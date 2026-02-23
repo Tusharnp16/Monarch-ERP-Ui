@@ -152,14 +152,14 @@
 
 /* Toggle button */
 .toggle-btn {
-  padding: 10px 14px;
+  padding: 10px 20px;
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   color: #94a3b8;
 }
 
 .toggle-btn:hover {
-  color: #fff;
+  color: #1613ba;
 }
 /* ===== SIDEBAR BASE ===== */
 .sidebar {
@@ -169,7 +169,6 @@
   position: sticky;
   top: 0;
 
-  background: var(--sidebar-bg);
   color: #fff;
 
   display: flex;

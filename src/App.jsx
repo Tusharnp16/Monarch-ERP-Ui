@@ -8,14 +8,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
+      { index: true, element: <Products /> },
       { path: "products", element: <Products /> },
-      { path: "inventory", element: <Products /> },
       { path: "variants", element: <Products /> },
       { path: "inventory", element: <Products /> },
       { path: "stockmaster", element: <Products /> },
       { path: "purchase", element: <Products /> },
       { path: "contacts", element: <Products /> },
-      { path: "purchase/report", element: <Products /> }, // purchase report
+      { path: "purchase/report", element: <Products /> },
       { path: "customers", element: <Products /> },
       { path: "salesinvoice", element: <Products /> },
       { path: "salesitem/recentitems", element: <Products /> },

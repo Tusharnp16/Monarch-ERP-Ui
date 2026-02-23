@@ -52,8 +52,7 @@
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0.4px;
-  padding: 8px 12px;
-  color: var(--text-primary);
+  padding: 5px 5px;
 }
 
 /* ===== NAV LIST ===== */
@@ -85,7 +84,9 @@
   color: var(--text-muted);
   text-decoration: none;
 
-  transition: background 0.18s ease, color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
 }
 
 .nav-link:hover {
@@ -137,4 +138,3 @@
   flex: 1;
   background: var(--content-bg);
 }
-

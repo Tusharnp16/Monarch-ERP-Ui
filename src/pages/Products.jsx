@@ -81,7 +81,7 @@ const Products = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: page,
-        size: 20,
+        size: 10,
         search: filters.search,
         startDate: filters.startDate,
         endDate: filters.endDate,

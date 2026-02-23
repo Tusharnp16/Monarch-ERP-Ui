@@ -48,11 +48,11 @@ const Sidebar = () => {
   ];
 
   return (
-    // <nav className="sidebar">
     <nav className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="toggle-btn" onClick={() => setCollapsed(!collapsed)}>
         <i className="fas fa-bars"></i>
       </div>
+
       <div className="brand-container">
         <div className="brand-box">
           <img
@@ -61,11 +61,11 @@ const Sidebar = () => {
             className="brand-logo"
             style={{
               height: "28px",
+              marginRight: "8px",
               width: "auto",
               borderRadius: "6px",
-              background: "#5e5252",
               padding: "2px",
-              border: "1px solid #121212",
+              border: "1px solid #ffffff",
             }}
           />
           <span className="brand-text">MONARCH ERP</span>
@@ -79,6 +79,7 @@ const Sidebar = () => {
           <li key={item.path} className="nav-item">
             <NavLink
               to={item.path}
+              end={item.path === "/purchase" || item.path === "/salesitem"}
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
