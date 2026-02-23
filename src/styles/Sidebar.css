@@ -75,7 +75,9 @@
   font-weight: 500;
   font-size: 14.5px;
 
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .nav-link:hover {
@@ -123,4 +125,93 @@
 
 .nav-link {
   letter-spacing: 0.3px;
+}
+
+/* ===== SIDEBAR BASE ===== */
+
+.sidebar {
+  width: 260px;
+  transition: width 0.25s ease;
+}
+
+/* ===== COLLAPSED MODE ===== */
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* Hide text when collapsed */
+.sidebar.collapsed .link-text {
+  display: none;
+}
+
+/* Center icons when collapsed */
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+}
+
+/* Toggle button */
+.toggle-btn {
+  padding: 10px 14px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  color: #94a3b8;
+}
+
+.toggle-btn:hover {
+  color: #fff;
+}
+/* ===== SIDEBAR BASE ===== */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+
+  background: var(--sidebar-bg);
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+  padding: 20px 12px;
+
+  border-right: 1px solid #1e293b;
+
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  transition: width 0.25s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== COLLAPSED MODE ===== */
+.sidebar.collapsed {
+  width: 80px;
+  min-width: 80px;
+}
+
+/* Hide text when collapsed */
+.sidebar.collapsed .link-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Center icons when collapsed */
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+}
+
+/* Smooth text transition */
+.link-text {
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .brand-text {
+  display: none;
 }

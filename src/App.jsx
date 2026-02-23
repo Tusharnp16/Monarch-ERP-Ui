@@ -1,16 +1,25 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // import './styles/App.css';
-import AppLayout from './components/AppLayout'; 
-import Products from './pages/Products';
+import AppLayout from "./components/AppLayout";
+import Products from "./pages/Products";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AppLayout />, 
+    element: <AppLayout />,
     children: [
       { path: "products", element: <Products /> },
       { path: "inventory", element: <Products /> },
       { path: "variants", element: <Products /> },
+      { path: "inventory", element: <Products /> },
+      { path: "stockmaster", element: <Products /> },
+      { path: "purchase", element: <Products /> },
+      { path: "contacts", element: <Products /> },
+      { path: "purchase/report", element: <Products /> }, // purchase report
+      { path: "customers", element: <Products /> },
+      { path: "salesinvoice", element: <Products /> },
+      { path: "salesitem/recentitems", element: <Products /> },
+      { path: "userlogs", element: <Products /> },
     ],
   },
 ]);

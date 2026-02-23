@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import ProductForm from "./ProductForm";
+import DeleteModal from "./DeleteModal";
 
 const API = "/api/products";
 
@@ -22,6 +23,8 @@ const Products = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -96,7 +99,6 @@ const Products = () => {
           setCurrentPage(result.data.number);
         }
       } catch (err) {
-        // Axios tells you exactly what happened (401? 404? 500?)
         console.error("Fetch error:", err.response?.data || err.message);
       } finally {
         setLoading(false);
@@ -119,29 +121,46 @@ const Products = () => {
   //   }, [filters.startDate, filters.endDate, currentPage, loadProducts]);
 
   useEffect(() => {
-    // Start the timer
     const delayDebounceFn = setTimeout(() => {
       loadProducts(currentPage);
     }, 500);
 
-    // Cleanup: This is the "magic". If the user types again
-    // before 500ms, the previous timer is killed.
     return () => clearTimeout(delayDebounceFn);
   }, [filters, currentPage, loadProducts]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(0); // Reset to first page on every new search/filter
+    setCurrentPage(0);
   };
 
-  // --- Handlers ---
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      const res = await fetch(`${API}/${id}`, { method: "DELETE" });
-      if (res.ok) loadProducts(currentPage);
+  // This just opens the modal and "remembers" the ID
+  const promptDelete = (id) => {
+    setIdToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  // This actually calls the API when the user clicks red "Delete" button
+  const handleConfirmDelete = async () => {
+    try {
+      await axios.delete(`${API}/${idToDelete}`);
+      setShowDeleteModal(false);
+      setIdToDelete(null);
+      loadProducts(currentPage);
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete product.");
     }
   };
+
+  // const handleDelete = async (id) => {
+  //   if (window.confirm("Are you sure you want to delete this product?")) {
+  //     const res1 = axios.delete(`${API}/${id}`); // Get current version
+  //     //    const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+  //     console.log("Delete response:", res1);
+  //     if (res1.ok) loadProducts(currentPage);
+  //   }
+  // };
 
   //   const handleFilterChange = (e) => {
   //     const { name, value } = e.target;
@@ -275,7 +294,7 @@ const Products = () => {
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDelete(p.productId)}
+                            onClick={() => promptDelete(p.productId)}
                           >
                             <Trash size={14} />
                           </button>
@@ -319,6 +338,14 @@ const Products = () => {
         onClose={() => setShowForm(false)}
         onSubmit={handleSave}
         initialData={editingProduct}
+      />
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Product?"
+        message="Are you sure? This will permanently remove the product from the catalog."
       />
     </div>
   );
