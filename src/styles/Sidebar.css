@@ -1,0 +1,126 @@
+:root {
+  --sidebar-width: 260px;
+  --sidebar-bg: #0f172a;
+  --sidebar-soft: #1e293b;
+  --primary: #2563eb;
+  --text-muted: #94a3b8;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== SIDEBAR ===== */
+
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+
+  background: var(--sidebar-bg);
+  color: #fff;
+
+  display: flex;
+  flex-direction: column;
+  padding: 20px 12px;
+
+  border-right: 1px solid #1e293b;
+
+  /* Remove scrollbar visually */
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* ===== BRAND ===== */
+
+.brand-box {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 10px 14px;
+}
+
+/* ===== NAV LIST ===== */
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.nav-item {
+  margin-bottom: 4px;
+}
+
+/* ===== NAV LINK ===== */
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 11px 16px;
+  border-radius: 8px;
+
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14.5px;
+
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover {
+  background: var(--sidebar-soft);
+  color: #fff;
+}
+
+/* ===== ACTIVE STATE ===== */
+
+.sidebar .nav-link.active {
+  background: var(--sidebar-soft);
+  color: #fff;
+  font-weight: 600;
+  border-left: 3px solid var(--primary);
+}
+
+/* ===== ICON STYLE ===== */
+
+.nav-link i {
+  width: 18px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* ===== LOGOUT ===== */
+
+.logout-btn {
+  color: #f87171;
+}
+
+.logout-btn:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: #fff;
+}
+
+/* ===== FOOTER ===== */
+
+.sidebar-footer {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #1e293b;
+}
+
+.nav-link {
+  letter-spacing: 0.3px;
+}
