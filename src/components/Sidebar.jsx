@@ -2,28 +2,22 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../styles/Sidebar.css";
 import logo from "../assets/logo.png";
+import APICon from "../api/AxiosConfig";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
-  // const handleLogout = async () => {
-  //   const token = localStorage.getItem("accessToken");
-  //   try {
-  //     await fetch("/auth/logout", {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //   } catch (err) {
-  //     console.error("Logout failed", err);
-  //   } finally {
-  //     localStorage.removeItem("accessToken");
-  //     navigate("/auth/login");
-  //   }
-  // };
+  const handleLogout = async () => {
+    try {
+      await APICon.post("/auth/logout");
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      localStorage.removeItem("accessToken");
+      navigate("/login");
+    }
+  };
 
   const navItems = [
     { path: "/products", icon: "fas fa-box", label: "Products" },
@@ -93,7 +87,7 @@ const Sidebar = () => {
         <hr className="divider" />
         <li className="nav-item">
           <button
-            // onClick={handleLogout}
+            onClick={handleLogout}
             className="nav-link logout-btn"
             style={{
               background: "none",
