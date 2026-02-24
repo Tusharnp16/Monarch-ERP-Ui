@@ -9,11 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import axios from "axios";
+import APICon from "../api/AxiosConfig";
 import ProductForm from "./ProductForm";
 import DeleteModal from "./DeleteModal";
 
-const API = "/api/products";
+const API = "/products";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -36,9 +36,9 @@ const Products = () => {
   const handleSave = async (formData) => {
     try {
       if (editingProduct) {
-        await axios.put(`${API}/${editingProduct.productId}`, formData);
+        await APICon.put(`${API}/${editingProduct.productId}`, formData);
       } else {
-        await axios.post(API, formData);
+        await APICon.post(API, formData);
       }
       setShowForm(false);
       setEditingProduct(null);
@@ -88,8 +88,7 @@ const Products = () => {
       });
 
       try {
-        const res = await axios.get(`${API}?${params.toString()}`);
-
+        const res = await APICon.get(`${API}?${params.toString()}`);
         const result = res.data;
 
         if (result.data) {
@@ -141,7 +140,7 @@ const Products = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`${API}/${idToDelete}`);
+      await API.delete(`${API}/${idToDelete}`);
       setShowDeleteModal(false);
       setIdToDelete(null);
       loadProducts(currentPage);
