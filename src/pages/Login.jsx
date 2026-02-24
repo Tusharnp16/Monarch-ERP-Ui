@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api/AxiosConfig";
-import "./login.css";
+import "../styles/Login.css";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -9,15 +9,17 @@ const Login = () => {
     password: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setCredentials({ ...credentials, [e.target.id]: e.target.value });
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const response = await API.post("/auth/login", credentials);
@@ -26,55 +28,72 @@ const Login = () => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      document.cookie = `accessToken=${accessToken}; path=/; Max-Age=${60 * 60}; SameSite=Strict`;
-
       navigate("/products");
     } catch (err) {
       setError("Invalid username or password.");
-      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="brand-logo">MONARCH ERP</div>
-        <div className="brand-subtitle">
-          Enterprise Resource Planning Portal
+    <div className="login-layout">
+      {/* LEFT SIDE - BRANDING */}
+      <div className="login-left">
+        <div className="overlay" />
+        <div className="brand-content">
+          <h1>MONARCH ERP</h1>
+          <p>Smart. Secure. Scalable.</p>
+
+          <div className="feature-list">
+            <div>✔ Inventory & Billing Automation</div>
+            <div>✔ Real-Time Analytics</div>
+            <div>✔ Secure Role-Based Access</div>
+            <div>✔ Cloud-Ready Infrastructure</div>
+          </div>
         </div>
+      </div>
 
-        {error && <div className="error-message">{error}</div>}
+      {/* RIGHT SIDE - LOGIN */}
+      <div className="login-right">
+        <div className="login-card">
+          <h2>Welcome Back</h2>
+          <p className="subtitle">Sign in to continue</p>
 
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label className="input-label">Username</label>
-            <input
-              type="text"
-              id="username"
-              required
-              className="login-input"
-              onChange={handleChange}
-            />
+          {error && <div className="error-message">{error}</div>}
+
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <input
+                type="text"
+                name="username"
+                required
+                placeholder=" "
+                onChange={handleChange}
+              />
+              <label>Username</label>
+            </div>
+
+            <div className="form-group">
+              <input
+                type="password"
+                name="password"
+                required
+                placeholder=" "
+                onChange={handleChange}
+              />
+              <label>Password</label>
+            </div>
+
+            <button type="submit" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            Don’t have an account?
+            <Link to="/auth/register"> Create Account</Link>
           </div>
-
-          <div className="input-group">
-            <label className="input-label">Password</label>
-            <input
-              type="password"
-              id="password"
-              required
-              className="login-input"
-              onChange={handleChange}
-            />
-          </div>
-
-          <button type="submit" className="login-button">
-            Sign In to Dashboard
-          </button>
-        </form>
-
-        <div className="login-footer">
-          Didn't have account!! <Link to="/auth/register"> Register Here</Link>
         </div>
       </div>
     </div>
