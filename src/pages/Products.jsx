@@ -134,13 +134,11 @@ const Products = () => {
     setCurrentPage(0);
   };
 
-  // This just opens the modal and "remembers" the ID
   const promptDelete = (id) => {
     setIdToDelete(id);
     setShowDeleteModal(true);
   };
 
-  // This actually calls the API when the user clicks red "Delete" button
   const handleConfirmDelete = async () => {
     try {
       await axios.delete(`${API}/${idToDelete}`);
@@ -171,7 +169,7 @@ const Products = () => {
     <div>
       <div className="topbar bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 className="h5 mb-0">Product Catalog</h1>
-        {/* Change setShowAddModal to setShowForm */}
+
         <button
           className="btn btn-primary"
           onClick={() => {
@@ -244,7 +242,6 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Product Table */}
         <div className="card">
           <div className="card-body p-0">
             <div className="table-responsive">
@@ -307,7 +304,6 @@ const Products = () => {
             </div>
           </div>
 
-          {/* Pagination */}
           <div className="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
             <div className="small text-muted">
               Showing page <strong>{currentPage + 1}</strong> of{" "}

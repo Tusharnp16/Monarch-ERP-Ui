@@ -3,6 +3,8 @@ import { AlertCircle } from "lucide-react";
 
 const DeleteModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
+  // console.log(onConfirm);
+  console.log(onClose);
 
   return (
     <div className="modal d-block bg-dark bg-opacity-50" tabIndex="-1">
@@ -12,7 +14,9 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, title, message }) => {
             <div className="text-danger mb-3">
               <AlertCircle size={48} />
             </div>
+
             <h5>{title || "Confirm Action"}</h5>
+
             <p className="text-muted small">
               {message || "This action cannot be undone."}
             </p>
