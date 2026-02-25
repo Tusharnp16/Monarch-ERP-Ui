@@ -1,0 +1,96 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: "Inter", sans-serif;
+}
+
+.reg-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.brand-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.brand-logo {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a237e;
+  letter-spacing: 1px;
+}
+
+.input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Change this in your CSS file */
+.reg-card .register {
+  width: 100%;
+  padding: 14px;
+  background-color: #1a237e !important; /* Adding !important temporarily confirms if it's a priority issue */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  display: block; /* Ensure it's treated as a block element */
+}
+
+.register:disabled {
+  background-color: #9fa8da;
+  cursor: not-allowed;
+}
+
+.msg {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.msg-error {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+.msg-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.footer-links {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 14px;
+}

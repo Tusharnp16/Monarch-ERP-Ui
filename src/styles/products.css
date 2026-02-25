@@ -1,0 +1,210 @@
+/* ============================= */
+/* GLOBAL PAGE LAYOUT */
+/* ============================= */
+
+body {
+  background-color: #f8fafc;
+}
+
+/* ============================= */
+/* TOPBAR */
+/* ============================= */
+
+.topbar {
+  background: #ffffff !important;
+  padding: 18px 28px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.topbar h1 {
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 0.3px;
+}
+
+/* Primary Button Upgrade */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* ============================= */
+/* CARDS */
+/* ============================= */
+
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+/* Stats Card */
+.card .h3 {
+  font-weight: 700;
+}
+
+.bg-primary.bg-opacity-10 {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-radius: 12px;
+}
+
+/* ============================= */
+/* FILTER SECTION */
+/* ============================= */
+
+.text-muted-small {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.input-group-text {
+  border-radius: 10px 0 0 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ============================= */
+/* TABLE */
+/* ============================= */
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead {
+  background-color: #f1f5f9;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table td {
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+  transform: scale(1.002);
+}
+
+/* Badge */
+.badge {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  background: #f1f5f9;
+}
+
+/* ============================= */
+/* ACTION BUTTONS */
+/* ============================= */
+
+.btn-sm {
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-info {
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+}
+
+.btn-outline-info:hover {
+  background-color: #0ea5e9;
+  color: white;
+}
+
+.btn-outline-danger {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.btn-outline-danger:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+/* ============================= */
+/* PAGINATION */
+/* ============================= */
+
+.card-footer {
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+.btn-outline-primary {
+  border-radius: 8px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background-color: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+}
+
+/* ============================= */
+/* LOADING */
+/* ============================= */
+
+.text-center.py-5 {
+  font-weight: 500;
+  color: #64748b;
+}
+/* Target the div that actually wraps your table */
+.table-responsive,
+.card-body,
+.table {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.table-responsive::-webkit-scrollbar,
+.card-body::-webkit-scrollbar,
+.table::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
