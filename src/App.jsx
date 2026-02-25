@@ -5,12 +5,14 @@ import Products from "./pages/Products";
 import Login from "./pages/login";
 import NotFound from "./pages/NotFound";
 import AppErrorBoundary from "./pages/AppErrorBoundary";
+import Register from "./pages/Register";
 
 const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
   },
+  { path: "/register", element: <Register /> },
   {
     path: "/",
     element: <AppLayout />,
