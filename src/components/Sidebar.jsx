@@ -41,6 +41,8 @@ const Sidebar = () => {
     { path: "/userlogs", icon: "fa-solid fa-display", label: "System Logs" },
   ];
 
+  const userName = localStorage.getItem("userName");
+
   return (
     <nav className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="toggle-btn" onClick={() => setCollapsed(!collapsed)}>

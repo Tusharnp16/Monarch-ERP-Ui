@@ -27,6 +27,7 @@ const Login = () => {
 
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("userName", credentials.username);
 
       navigate("/products");
     } catch (err) {

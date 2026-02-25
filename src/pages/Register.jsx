@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api/AxiosConfig";
-import "../styles/login.css"; // <-- SAME CSS AS LOGIN
+import "../styles/login.css";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -28,10 +28,7 @@ const Register = () => {
       await API.post("/auth/register", formData);
       navigate("/login");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Registration failed. Username or email may already exist.",
-      );
+      setError("Registration failed. Username or email may already exist.");
     } finally {
       setIsLoading(false);
     }
