@@ -3,6 +3,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Products from "./pages/Products";
 import Login from "./pages/login";
+import NotFound from "./pages/NotFound";
+import AppErrorBoundary from "./pages/AppErrorBoundary";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +27,7 @@ const router = createBrowserRouter([
       { path: "salesinvoice", element: <Products /> },
       { path: "salesitem/recentitems", element: <Products /> },
       { path: "userlogs", element: <Products /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ]);

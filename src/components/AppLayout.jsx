@@ -1,11 +1,10 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
-import { Outlet, Navigate } from "react-router-dom"; // Add Navigate here
+import { Outlet, Navigate } from "react-router-dom";
 
 const AppLayout = () => {
   const token = localStorage.getItem("accessToken");
 
-  // This only catches users who have NO token at all
   if (!token) {
     return <Navigate to="/login" replace />;
   }
