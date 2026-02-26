@@ -26,6 +26,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
+  const [error, setError] = useState(null);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -100,6 +101,13 @@ const Products = () => {
         }
       } catch (err) {
         console.error("Fetch error:", err.response?.data || err.message);
+        if (!err.response) {
+          setError(
+            "Server is currently unreachable. Please check your connection or try again later.",
+          );
+        } else {
+          setError("Failed to load products due to a server error (500).");
+        }
       } finally {
         setLoading(false);
       }
@@ -260,6 +268,22 @@ const Products = () => {
                     <tr>
                       <td colSpan="5" className="text-center py-5">
                         Loading...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-5">
+                        <div className="text-danger">
+                          <PackageOpen size={48} className="mb-3 opacity-50" />
+                          <h5 className="fw-bold">Service Unavailable</h5>
+                          <p className={error}>{error}</p>
+                          <button
+                            className="btn btn-sm btn-outline-danger mt-2"
+                            onClick={() => loadProducts(currentPage)}
+                          >
+                            Retry Connection
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ) : (

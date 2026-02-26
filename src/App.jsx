@@ -6,6 +6,7 @@ import Login from "./pages/login";
 import NotFound from "./pages/NotFound";
 import AppErrorBoundary from "./pages/AppErrorBoundary";
 import Register from "./pages/Register";
+import Variants from "./pages/Variants";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +20,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Products /> },
       { path: "products", element: <Products /> },
-      { path: "variants", element: <Products /> },
+      { path: "variants", element: <Variants /> },
       { path: "inventory", element: <Products /> },
       { path: "stockmaster", element: <Products /> },
       { path: "purchase", element: <Products /> },
