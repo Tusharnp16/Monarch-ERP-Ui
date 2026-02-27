@@ -35,14 +35,25 @@ const Variants = () => {
       const res = await API.get("/variants", { params: { lastId } });
       const result = res.data;
 
+      // if (result.success) {
+      //   const newBatch = result.data.variants;
+
+      //   if (lastId === 0) {
+      //     setVariants(newBatch);
+      //   } else {
+      //     setVariants((prev) => [...prev, ...newBatch]);
+      //   }
+
+      //   setHasNext(result.data.hasNext);
+      //   if (newBatch.length > 0) {
+      //     setCursor(newBatch[newBatch.length - 1].variantId);
+      //   }
+      // }
+
       if (result.success) {
         const newBatch = result.data.variants;
 
-        if (lastId === 0) {
-          setVariants(newBatch);
-        } else {
-          setVariants((prev) => [...prev, ...newBatch]);
-        }
+        setVariants(newBatch);
 
         setHasNext(result.data.hasNext);
         if (newBatch.length > 0) {
@@ -59,15 +70,15 @@ const Variants = () => {
   useEffect(() => {
     const socket = new SockJS("/ws-monarch");
 
-    // const token = localStorage.getItem("accessToken");
-    // console.log("Attempting WebSocket connection with token:", token);
+    const token = localStorage.getItem("accessToken");
+    console.log("Attempting WebSocket connection with token:", token);
 
     const stompClient = new Client({
       webSocketFactory: () => socket,
 
-      // connectHeaders: {
-      //   Authorization: `Bearer ${token}`,
-      // },
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
 
       onConnect: () => {
         console.log("Connected to WebSocket");
@@ -89,6 +100,15 @@ const Variants = () => {
             return [updatedVariant, ...prev];
           });
         });
+
+        // stompClient.subscribe("/topic/admin-alerts", (message) => {
+        //   const adminMessage = message.body;
+        //   console.log(adminMessage);
+
+        //   console.log("ALERT:", adminMessage);
+
+        //   alert(adminMessage);
+        // });
       },
     });
 
