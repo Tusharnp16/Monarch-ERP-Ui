@@ -72,7 +72,7 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
           params: { productId: productIdParam },
         });
       }
-      onRefresh();
+      // onRefresh();
       onClose();
     } catch (err) {
       const errMsg = err.response?.data?.message || "Failed to save variant";

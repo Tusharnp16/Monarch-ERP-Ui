@@ -12,6 +12,8 @@ import VariantModal from "./VariantModal";
 import DeleteModal from "./DeleteModal";
 import API from "../api/AxiosConfig";
 import "../styles/products.css";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const Variants = () => {
   const [variants, setVariants] = useState([]);
@@ -30,29 +32,69 @@ const Variants = () => {
   const loadVariants = async (lastId = 0) => {
     setLoading(true);
     try {
-      const res = await API.get("/variants", {
-        params: { lastId },
-      });
-
+      const res = await API.get("/variants", { params: { lastId } });
       const result = res.data;
+
       if (result.success) {
-        setVariants(result.data.variants);
+        const newBatch = result.data.variants;
+
+        if (lastId === 0) {
+          setVariants(newBatch);
+        } else {
+          setVariants((prev) => [...prev, ...newBatch]);
+        }
+
         setHasNext(result.data.hasNext);
-        setCursor(result.data.nextCursor);
+        if (newBatch.length > 0) {
+          setCursor(newBatch[newBatch.length - 1].variantId);
+        }
       }
     } catch (err) {
       console.error("Load failed:", err);
-      if (!err.response) {
-        setError(
-          "Server is currently unreachable. Please check your connection or try again later.",
-        );
-      } else {
-        setError("Failed to load products due to a server error (500).");
-      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const socket = new SockJS("/ws-monarch");
+
+    // const token = localStorage.getItem("accessToken");
+    // console.log("Attempting WebSocket connection with token:", token);
+
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+
+      // connectHeaders: {
+      //   Authorization: `Bearer ${token}`,
+      // },
+
+      onConnect: () => {
+        console.log("Connected to WebSocket");
+
+        stompClient.subscribe("/topic/variants", (message) => {
+          const updatedVariant = JSON.parse(message.body);
+
+          console.log("WebSocket Received Data:", updatedVariant);
+
+          setVariants((prev) => {
+            const index = prev.findIndex(
+              (v) => v.variantId === updatedVariant.variantId,
+            );
+            if (index !== -1) {
+              const newList = [...prev];
+              newList[index] = updatedVariant;
+              return newList;
+            }
+            return [updatedVariant, ...prev];
+          });
+        });
+      },
+    });
+
+    stompClient.activate();
+    return () => stompClient.deactivate();
+  }, []);
 
   useEffect(() => {
     loadVariants();
@@ -64,13 +106,12 @@ const Variants = () => {
       await API.delete(`/variants/${idToDelete}`);
       setShowDeleteModal(false);
       setIdToDelete(null);
-      loadVariants(0);
+      // loadVariants(0);
     } catch (err) {
       console.error("Delete failed:", err);
     }
   };
 
-  // LOCAL FILTERING
   const filteredVariants = variants.filter(
     (v) =>
       v.variantName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,6 +165,9 @@ const Variants = () => {
               <table className="table table-hover align-middle mb-0">
                 <thead className="bg-slate-50 border-bottom">
                   <tr>
+                    <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
+                      Id
+                    </th>
                     <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
                       SKU
                     </th>
@@ -182,6 +226,11 @@ const Variants = () => {
                         key={v.variantId}
                         className="transition-colors hover:bg-slate-50"
                       >
+                        <td className="px-6 py-4">
+                          <span className="badge text-primary bg-blue-50">
+                            {v.variantId || "N/A"}
+                          </span>
+                        </td>
                         <td className="px-6 py-4">
                           <span className="badge text-primary bg-blue-50">
                             {v.product?.itemCode || "N/A"}
@@ -277,7 +326,7 @@ const Variants = () => {
             setIsAddModalOpen(false);
             setEditingVariant(null);
           }}
-          onRefresh={() => loadVariants(0)}
+          // onRefresh={() => loadVariants(0)}
         />
       )}
 

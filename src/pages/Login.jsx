@@ -31,6 +31,11 @@ const Login = () => {
 
       navigate("/products");
     } catch (err) {
+      if (err.response.status === 500) {
+        setError("Server error. Please try again later.");
+        setLoading(false);
+        return;
+      }
       setError("Invalid username or password.");
     } finally {
       setLoading(false);

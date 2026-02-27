@@ -256,7 +256,7 @@ const Products = () => {
               <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="ps-3">#</th>
+                    <th className="ps-3">Id</th>
                     <th>Product Name</th>
                     <th>Item Code</th>
                     <th>Created At</th>
