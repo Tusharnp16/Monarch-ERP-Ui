@@ -24,7 +24,7 @@ const Sidebar = () => {
     { path: "/variants", icon: "fas fa-tags", label: "Variants" },
     { path: "/inventory", icon: "fas fa-warehouse", label: "Inventory" },
     { path: "/stockmaster", icon: "fas fa-chart-line", label: "Stock Master" },
-    { path: "/purchase", icon: "fas fa-shopping-cart", label: "Purchase" },
+    { path: "/purchase", icon: "fas fa-shopping-cart", label: "OrderCard" },
     { path: "/contacts", icon: "fas fa-address-book", label: "Contact" },
     { path: "/purchase/report", icon: "fas fa-file-alt", label: "Report" },
     { path: "/customers", icon: "fas fa-user-friends", label: "Customer" },

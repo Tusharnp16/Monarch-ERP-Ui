@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Home, AlertTriangle } from "lucide-react";
-import "../styles/Sidebar.css";
+import "../styles/NotFound.css";
 
 const NotFound = () => {
   return (
@@ -9,7 +9,15 @@ const NotFound = () => {
       <div className="nf-bg-shape shape2"></div>
 
       <div className="nf-card">
-        <div className="nf-icon">
+        <div
+          className="nf-icon"
+          style={{
+            color: "#e53e3e",
+            justifyContent: "center",
+            alignItems: "center",
+            display: "flex",
+          }}
+        >
           <AlertTriangle size={48} />
         </div>
 

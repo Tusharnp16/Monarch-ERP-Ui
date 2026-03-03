@@ -179,7 +179,7 @@ const Products = () => {
         <h1 className="h5 mb-0">Product Catalog</h1>
 
         <button
-          className="btn btn-primary"
+          className="btn btn-primary d-flex align-items-center"
           onClick={() => {
             setEditingProduct(null);
             setShowForm(true);

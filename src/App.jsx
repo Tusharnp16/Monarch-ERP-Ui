@@ -7,6 +7,8 @@ import NotFound from "./pages/NotFound";
 import AppErrorBoundary from "./pages/AppErrorBoundary";
 import Register from "./pages/Register";
 import Variants from "./pages/Variants";
+import Inventory from "./pages/Inventory";
+import OrderCard from "./pages/OrderCard";
 
 const router = createBrowserRouter([
   {
@@ -21,9 +23,9 @@ const router = createBrowserRouter([
       { index: true, element: <Products /> },
       { path: "products", element: <Products /> },
       { path: "variants", element: <Variants /> },
-      { path: "inventory", element: <Products /> },
+      { path: "inventory", element: <Inventory /> },
       { path: "stockmaster", element: <Products /> },
-      { path: "purchase", element: <Products /> },
+      { path: "purchase", element: <OrderCard /> },
       { path: "contacts", element: <Products /> },
       { path: "purchase/report", element: <Products /> },
       { path: "customers", element: <Products /> },

@@ -1,0 +1,40 @@
+.nf-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a; /* Dark space-like background */
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.nf-card {
+  text-align: center;
+  z-index: 10;
+  padding: 2rem;
+}
+
+.nf-404 {
+  font-size: 8rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+}
+
+.nf-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #3b82f6;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: white;
+  margin-top: 2rem;
+}
