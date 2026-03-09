@@ -26,6 +26,37 @@ const StockMaster = () => {
     }
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const longPollStocks = async () => {
+      while (isMounted) {
+        try {
+          const response = await API.get("/stockmaster/poll");
+
+          if (!isMounted) return;
+
+          if (response.status === 200 && response.data?.success) {
+            setStocks(response.data.data);
+            await new Promise((resolve) => setTimeout(resolve, 30000));
+          }
+        } catch (err) {
+          console.error("Polling error, retrying in 3s...", err);
+
+          await new Promise((resolve) => setTimeout(resolve, 30000));
+        } finally {
+          if (isMounted) setLoading(false);
+        }
+      }
+    };
+
+    longPollStocks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredStocks = useMemo(() => {
     return stocks.filter(
       (s) =>
