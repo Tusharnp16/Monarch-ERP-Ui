@@ -20,7 +20,14 @@ const Inventory = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchInventory();
+    fetchInventory(true);
+
+    const POLLING_INTERVAL = 30000;
+    const intervalId = setInterval(() => {
+      fetchInventory(false);
+    }, POLLING_INTERVAL);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -35,10 +42,9 @@ const Inventory = () => {
     setFilteredInventory(filtered);
   }, [searchTerm, inventory]);
 
-  // REFACTORED: Now using your API utility
-  const fetchInventory = async () => {
+  const fetchInventory = async (isInitialLoad = false) => {
     try {
-      setIsLoading(true);
+      if (isInitialLoad) setIsLoading(true);
       const response = await API.get("/inventory");
 
       // Axios puts the body in .data automatically
