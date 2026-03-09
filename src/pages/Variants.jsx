@@ -7,6 +7,9 @@ import {
   ChevronRight,
   ChevronsLeft,
   PackageOpen,
+  AlertCircle,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 import VariantModal from "./VariantModal";
 import DeleteModal from "./DeleteModal";
@@ -29,6 +32,11 @@ const Variants = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const [error, setError] = useState(null);
+
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [isVerified, setIsVerified] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   // --- Refs ---
   const fileInputRef = useRef(null);
@@ -61,24 +69,50 @@ const Variants = () => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (file) {
+      setSelectedFile(file);
+      handleVerify(file);
+    }
+  };
 
+  const handleVerify = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
-
     setLoading(true);
     try {
-      await API.post("/variants/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      //     loadVariants();
+      const res = await API.post("/variants/verify", formData);
+      if (res.data.success) {
+        setIsVerified(true);
+        setValidationErrors([]);
+      } else {
+        setValidationErrors(res.data.errors);
+        setIsVerified(false);
+        setShowValidationModal(true);
+      }
     } catch (err) {
-      console.error("Import failed:", err);
+      console.error("Verification failed");
     } finally {
       setLoading(false);
-      e.target.value = null;
+    }
+  };
+
+  const handleUpload = async () => {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    setLoading(true);
+    try {
+      await API.post("/variants/upload", formData);
+      // Reset state on success
+      setSelectedFile(null);
+      setIsVerified(false);
+      loadVariants();
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setError("Upload failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,7 +171,6 @@ const Variants = () => {
   return (
     <div>
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
         <header className="topbar d-flex align-items-center justify-content-between sticky top-0 z-10 bg-white p-4 border-bottom">
           <div>
             <h1 className="h5 mb-0 text-xl font-semibold text-slate-800">
@@ -148,33 +181,139 @@ const Variants = () => {
             </span>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 align-items-center">
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept=".xlsx, .xls"
-              className="hidden"
-              style={{ display: "none" }}
+              accept=".xlsx,.xls"
+              hidden
             />
 
-            <button
-              onClick={handleImportClick}
-              className="btn btn-outline-secondary d-flex align-items-center gap-2"
-              disabled={loading}
-            >
-              <PackageOpen size={18} />{" "}
-              {loading ? "Processing..." : "Bulk Import"}
-            </button>
+            {!isVerified ? (
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className={`btn ${validationErrors.length > 0 ? "btn-outline-danger" : "btn-outline-secondary"} d-flex align-items-center gap-2`}
+                disabled={loading}
+              >
+                <PackageOpen size={18} />
+                {loading ? "Verifying..." : "Upload Excel"}
+              </button>
+            ) : (
+              <div className="flex gap-2 animate-in fade-in zoom-in duration-300">
+                <div className="flex align-items-center px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-200 text-sm font-medium">
+                  <CheckCircle2 size={16} className="me-2" /> File Ready
+                </div>
+                <button
+                  onClick={handleUpload}
+                  className="btn btn-success d-flex align-items-center gap-2"
+                >
+                  Confirm & Import
+                </button>
+                <button
+                  onClick={() => {
+                    setIsVerified(false);
+                    setSelectedFile(null);
+                  }}
+                  className="btn btn-link text-slate-400 p-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="btn btn-primary d-flex align-items-center gap-2"
+              className="btn btn-primary d-flex align-items-center gap-2 ms-2"
             >
               <Plus size={18} /> Add Variant
             </button>
           </div>
         </header>
+
+        {/* ... Rest of your search and table code ... */}
+
+        {/* --- PROFESSIONAL VALIDATION MODAL --- */}
+        {showValidationModal && (
+          <div
+            className="modal fade show d-block"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header bg-red-50 border-bottom">
+                  <div className="flex align-items-center gap-3">
+                    <div className="p-2 bg-red-100 text-red-600 rounded-circle">
+                      <AlertCircle size={24} />
+                    </div>
+                    <div>
+                      <h5 className="modal-title font-bold text-red-900">
+                        Import Errors Found
+                      </h5>
+                      <p className="text-sm text-red-700 mb-0">
+                        Please fix these issues in your Excel file and upload
+                        again.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-close shadow-none"
+                    onClick={() => setShowValidationModal(false)}
+                  ></button>
+                </div>
+                <div
+                  className="modal-body p-0"
+                  style={{ maxHeight: "400px", overflowY: "auto" }}
+                >
+                  <table className="table table-striped mb-0">
+                    <thead className="bg-slate-50 sticky top-0">
+                      <tr>
+                        <th className="ps-4 py-3 text-xs uppercase text-slate-500 w-24">
+                          Row
+                        </th>
+                        <th className="py-3 text-xs uppercase text-slate-500">
+                          Issue Description
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {validationErrors.map((err, idx) => (
+                        <tr key={idx}>
+                          <td className="ps-4 py-3 font-mono text-sm text-slate-600">
+                            #{err.row}
+                          </td>
+                          <td className="py-3 text-sm text-red-600 font-medium">
+                            {err.message}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="modal-footer bg-slate-50 border-top">
+                  <button
+                    type="button"
+                    className="btn btn-secondary px-4"
+                    onClick={() => setShowValidationModal(false)}
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary px-4"
+                    onClick={() => {
+                      setShowValidationModal(false);
+                      fileInputRef.current.click();
+                    }}
+                  >
+                    Try Re-uploading
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="p-6">
           {/* Filters */}
