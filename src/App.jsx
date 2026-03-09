@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Variants from "./pages/Variants";
 import Inventory from "./pages/Inventory";
 import OrderCard from "./pages/OrderCard";
+import StockMaster from "./pages/StockMaster";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
       { path: "products", element: <Products /> },
       { path: "variants", element: <Variants /> },
       { path: "inventory", element: <Inventory /> },
-      { path: "stockmaster", element: <Products /> },
+      { path: "stockmaster", element: <StockMaster /> },
       { path: "purchase", element: <OrderCard /> },
       { path: "contacts", element: <Products /> },
       { path: "purchase/report", element: <Products /> },

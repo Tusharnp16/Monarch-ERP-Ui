@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import VariantModal from "./VariantModal";
 import DeleteModal from "./DeleteModal";
-import API from "../api/AxiosConfig";
+import APICon from "../api/AxiosConfig";
 import "../styles/products.css";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
@@ -45,7 +45,7 @@ const Variants = () => {
   const loadVariants = async (lastId = 0) => {
     setLoading(true);
     try {
-      const res = await API.get("/variants", { params: { lastId } });
+      const res = await APICon.get("/variants", { params: { lastId } });
       const result = res.data;
 
       if (result.success) {
@@ -82,7 +82,7 @@ const Variants = () => {
     formData.append("file", file);
     setLoading(true);
     try {
-      const res = await API.post("/variants/verify", formData);
+      const res = await APICon.post("/variants/verify", formData);
       if (res.data.success) {
         setIsVerified(true);
         setValidationErrors([]);
@@ -103,7 +103,7 @@ const Variants = () => {
     formData.append("file", selectedFile);
     setLoading(true);
     try {
-      await API.post("/variants/upload", formData);
+      await APICon.post("/variants/upload", formData);
       // Reset state on success
       setSelectedFile(null);
       setIsVerified(false);
@@ -154,7 +154,7 @@ const Variants = () => {
   const handleDelete = async () => {
     if (!idToDelete) return;
     try {
-      await API.delete(`/variants/${idToDelete}`);
+      await APICon.delete(`/variants/${idToDelete}`);
       setShowDeleteModal(false);
       setIdToDelete(null);
     } catch (err) {
