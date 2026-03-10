@@ -26,6 +26,8 @@ const StockMaster = () => {
     }
   };
 
+  {
+    /*
   useEffect(() => {
     let isMounted = true;
 
@@ -56,6 +58,9 @@ const StockMaster = () => {
       isMounted = false;
     };
   }, []);
+
+    */
+  }
 
   const filteredStocks = useMemo(() => {
     return stocks.filter(

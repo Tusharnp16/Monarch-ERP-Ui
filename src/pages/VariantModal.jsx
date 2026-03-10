@@ -13,6 +13,16 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
   });
 
   const [error, setError] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file)); // Show the user what they selected
+    }
+  };
 
   useEffect(() => {
     if (variant) {
@@ -60,16 +70,39 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
     }
 
     try {
-      const payload = { ...formData, productId: formData.productId?.value };
+      const payload = new FormData();
+
+      const variantData = {
+        variantId: formData.variantId,
+        variantName: formData.variantName,
+        colour: formData.colour,
+        size: formData.size,
+        mrp: { price: formData.mrp },
+        sellingPrice: { price: formData.sellingPrice },
+      };
+
+      payload.append(
+        "variant",
+        new Blob([JSON.stringify(variantData)], {
+          type: "application/json",
+        }),
+      );
+
+      if (selectedFile) {
+        payload.append("file", selectedFile);
+      }
+
       const productIdParam = formData.productId?.value;
 
       if (variant) {
         await API.put(`/variants/${variant.variantId}`, payload, {
           params: { productId: productIdParam },
+          headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
         await API.post(`/variants`, payload, {
           params: { productId: productIdParam },
+          headers: { "Content-Type": "multipart/form-data" },
         });
       }
       // onRefresh();
@@ -106,6 +139,29 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
               placeholder="Search product..."
               classNamePrefix="react-select"
             />
+          </div>
+          <div className="mb-3 text-center">
+            <label className="text-muted-small mb-1 d-block text-left">
+              Variant Image
+            </label>
+            <div className="image-upload-wrapper border rounded p-3 bg-light">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="img-thumbnail mb-2"
+                  style={{ maxHeight: "150px" }}
+                />
+              ) : (
+                <div className="py-4 text-slate-400">No image selected</div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="form-control form-control-sm"
+                onChange={handleFileChange}
+              />
+            </div>
           </div>
 
           <div className="mb-3">

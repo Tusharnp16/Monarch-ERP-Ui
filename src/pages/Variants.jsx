@@ -351,6 +351,9 @@ const Variants = () => {
                       Parent Product
                     </th>
                     <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
+                      Variant Image
+                    </th>
+                    <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
                       Variant Name
                     </th>
                     <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
@@ -389,6 +392,27 @@ const Variants = () => {
                         </td>
                         <td className="px-6 py-4 font-medium">
                           {v.product?.productName}
+                        </td>
+                        <td className="px-6 py-4">
+                          {v.imageUrl ? (
+                            <img
+                              src={v.imageUrl}
+                              alt={v.variantName}
+                              className="rounded shadow-sm"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <div className="bg-slate-100 rounded flex items-center justify-center w-10 h-10">
+                              <PackageOpen
+                                size={16}
+                                className="text-slate-400"
+                              />
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4">{v.variantName}</td>
                         <td className="px-6 py-4">
