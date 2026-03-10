@@ -351,7 +351,7 @@ const Variants = () => {
                       Parent Product
                     </th>
                     <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
-                      Variant Image
+                      Image
                     </th>
                     <th className="px-6 py-4 text-slate-600 font-semibold uppercase text-xs">
                       Variant Name

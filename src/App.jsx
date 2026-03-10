@@ -10,6 +10,7 @@ import Variants from "./pages/Variants";
 import Inventory from "./pages/Inventory";
 import OrderCard from "./pages/OrderCard";
 import StockMaster from "./pages/StockMaster";
+import LoginHistory from "./pages/LoginHistory";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
       { path: "customers", element: <Products /> },
       { path: "salesinvoice", element: <Products /> },
       { path: "salesitem/recentitems", element: <Products /> },
-      { path: "userlogs", element: <Products /> },
+      { path: "userlogs", element: <LoginHistory /> },
       { path: "*", element: <NotFound /> },
     ],
   },

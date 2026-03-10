@@ -14,13 +14,15 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
 
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file)); // Show the user what they selected
+      setPreviewUrl(URL.createObjectURL(file));
+      setIsImageDeleted(false);
     }
   };
 
@@ -40,6 +42,11 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
             }
           : null,
       });
+
+      if (variant.imageUrl) {
+        setPreviewUrl(variant.imageUrl);
+        setIsImageDeleted(false);
+      }
     }
   }, [variant]);
 
@@ -90,13 +97,20 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
 
       if (selectedFile) {
         payload.append("file", selectedFile);
+      } else {
+        payload.append("file", "");
       }
 
       const productIdParam = formData.productId?.value;
 
+      const params = {
+        productId: productIdParam,
+        removeImage: isImageDeleted,
+      };
+
       if (variant) {
         await API.put(`/variants/${variant.variantId}`, payload, {
-          params: { productId: productIdParam },
+          params: params,
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
@@ -146,12 +160,26 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
             </label>
             <div className="image-upload-wrapper border rounded p-3 bg-light">
               {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="img-thumbnail mb-2"
-                  style={{ maxHeight: "150px" }}
-                />
+                <div className="position-relative d-inline-block">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="img-thumbnail mb-2"
+                    style={{ maxHeight: "150px" }}
+                  />
+
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
+                    onClick={() => {
+                      setPreviewUrl(null);
+                      setSelectedFile(null);
+                      setIsImageDeleted(true); // Mark for deletion on backend
+                    }}
+                  >
+                    &times;
+                  </button>
+                </div>
               ) : (
                 <div className="py-4 text-slate-400">No image selected</div>
               )}
