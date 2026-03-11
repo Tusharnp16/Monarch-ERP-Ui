@@ -22,7 +22,7 @@ const Inventory = () => {
   useEffect(() => {
     fetchInventory(true);
 
-    const POLLING_INTERVAL = 30000;
+    const POLLING_INTERVAL = 10000;
     const intervalId = setInterval(() => {
       fetchInventory(false);
     }, POLLING_INTERVAL);

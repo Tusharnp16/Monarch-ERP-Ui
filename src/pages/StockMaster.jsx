@@ -27,39 +27,36 @@ const StockMaster = () => {
   };
 
   {
-    /*
-  useEffect(() => {
-    let isMounted = true;
+    useEffect(() => {
+      let isMounted = true;
 
-    const longPollStocks = async () => {
-      while (isMounted) {
-        try {
-          const response = await API.get("/stockmaster/poll");
+      const longPollStocks = async () => {
+        while (isMounted) {
+          try {
+            const response = await API.get("/stockmaster/poll");
 
-          if (!isMounted) return;
+            if (!isMounted) return;
 
-          if (response.status === 200 && response.data?.success) {
-            setStocks(response.data.data);
+            if (response.status === 200 && response.data?.success) {
+              setStocks(response.data.data);
+              await new Promise((resolve) => setTimeout(resolve, 30000));
+            }
+          } catch (err) {
+            console.error("Polling error, retrying in 3s...", err);
+
             await new Promise((resolve) => setTimeout(resolve, 30000));
+          } finally {
+            if (isMounted) setLoading(false);
           }
-        } catch (err) {
-          console.error("Polling error, retrying in 3s...", err);
-
-          await new Promise((resolve) => setTimeout(resolve, 30000));
-        } finally {
-          if (isMounted) setLoading(false);
         }
-      }
-    };
+      };
 
-    longPollStocks();
+      longPollStocks();
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-    */
+      return () => {
+        isMounted = false;
+      };
+    }, []);
   }
 
   const filteredStocks = useMemo(() => {
@@ -87,14 +84,13 @@ const StockMaster = () => {
       return;
     }
 
-    const updateData = {
-      stockMasterId: formData.get("stockMasterId"),
-      mrp: mrp,
-      sellingPrice: sellingPrice,
-    };
+    const params = new URLSearchParams();
+    params.append("stockMasterId", formData.get("stockMasterId"));
+    params.append("mrp", formData.get("mrp"));
+    params.append("sellingPrice", formData.get("sellingPrice"));
 
     try {
-      const response = await API.post("/stockmaster/update", updateData);
+      const response = await API.post("/stockmaster/update", params);
 
       if (response.data.success) {
         setIsModalOpen(false);
