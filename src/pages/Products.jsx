@@ -149,13 +149,12 @@ const Products = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await API.delete(`${API}/${idToDelete}`);
+      await APICon.delete(`${API}/${idToDelete}`);
       setShowDeleteModal(false);
       setIdToDelete(null);
       loadProducts(currentPage);
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Failed to delete product.");
     }
   };
 
