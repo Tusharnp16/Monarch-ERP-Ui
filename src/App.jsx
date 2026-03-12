@@ -12,6 +12,7 @@ import OrderCard from "./pages/OrderCard";
 import StockMaster from "./pages/StockMaster";
 import LoginHistory from "./pages/LoginHistory";
 import Contacts from "./pages/Contacts";
+import Customers from "./pages/Customers";
 
 const router = createBrowserRouter([
   {
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
       { path: "purchase", element: <OrderCard /> },
       { path: "contacts", element: <Contacts /> },
       { path: "purchase/report", element: <Products /> },
-      { path: "customers", element: <Products /> },
+      { path: "customers", element: <Customers /> },
       { path: "salesinvoice", element: <Products /> },
       { path: "salesitem/recentitems", element: <Products /> },
       { path: "userlogs", element: <LoginHistory /> },
