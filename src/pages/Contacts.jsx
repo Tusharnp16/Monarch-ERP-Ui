@@ -20,6 +20,13 @@ const Contacts = () => {
   });
   const [selectedId, setSelectedId] = useState(null);
 
+  const [notice, setNotice] = useState(null);
+
+  const showNotice = (msg, isError = false) => {
+    setNotice({ msg, isError });
+    setTimeout(() => setNotice(null), 3000);
+  };
+
   const fetchContacts = async () => {
     setLoading(true);
     try {
@@ -40,8 +47,10 @@ const Contacts = () => {
     try {
       if (selectedId) {
         await API.put(`${API_URL}/${selectedId}`, formData);
+        showNotice("Customer updated successfully");
       } else {
         await API.post(API_URL, formData);
+        showNotice("Customer added successfully");
       }
       closeModals();
       fetchContacts();
@@ -54,9 +63,11 @@ const Contacts = () => {
     try {
       await API.delete(`${API_URL}/${selectedId}`);
       setShowDeleteModal(false);
+      showNotice("Customer deleted successfully");
       fetchContacts();
     } catch (err) {
       console.error("Delete failed:", err);
+      showNotice("Failed to delete customer", true);
     }
   };
 
@@ -220,6 +231,7 @@ const Contacts = () => {
                   required
                   className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   value={formData.mobileno}
+                  maxLength={10}
                   onChange={(e) =>
                     setFormData({ ...formData, mobileno: e.target.value })
                   }
@@ -286,6 +298,13 @@ const Contacts = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {notice && (
+        <div
+          className={`fixed bottom-6 right-6 z-[100] px-6 py-3 rounded-xl shadow-2xl text-white font-medium animate-in slide-in-from-right duration-300 ${notice.isError ? "bg-red-600" : "bg-green-600"}`}
+        >
+          {notice.msg}
         </div>
       )}
     </div>

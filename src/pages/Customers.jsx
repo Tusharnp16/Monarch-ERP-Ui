@@ -278,6 +278,7 @@ const Customers = () => {
                     pattern="\d{10}"
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     value={formData.mobile}
+                    maxLength={10}
                     onChange={(e) =>
                       setFormData({ ...formData, mobile: e.target.value })
                     }
@@ -305,12 +306,17 @@ const Customers = () => {
                 <input
                   required
                   type="email"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                  title="Please enter a valid email address (e.g., name@example.com)"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none invalid:border-red-500 invalid:text-red-600"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
                 />
+                <p className="mt-1 hidden peer-invalid:block text-[10px] text-red-500">
+                  Invalid email format.
+                </p>
               </div>
             </div>
             <div className="p-6 pt-0">
