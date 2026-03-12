@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api/AxiosConfig";
 import "../styles/Login.css";
+import { AlertCircle } from "lucide-react";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -31,12 +32,15 @@ const Login = () => {
 
       navigate("/products");
     } catch (err) {
-      if (err.response.status === 500) {
-        setError("Server error. Please try again later.");
-        setLoading(false);
-        return;
+      if (err.response) {
+        if (err.response.status === 500) {
+          setError("Server is currently unavailable. Please try again later.");
+        } else {
+          setError("Invalid username or password. Please try again.");
+        }
+      } else {
+        setError("Network error. Please check your connection.");
       }
-      setError("Invalid username or password.");
     } finally {
       setLoading(false);
     }

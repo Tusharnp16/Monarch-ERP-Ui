@@ -111,7 +111,6 @@ const Register = () => {
                 }}
               >
                 <option value="USER">Standard User</option>
-                <option value="MODERATOR">Moderator</option>
                 <option value="ADMIN">System Administrator</option>
               </select>
             </div>
