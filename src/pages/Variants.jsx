@@ -316,22 +316,23 @@ const Variants = () => {
         )}
 
         <div className="p-6">
-          {/* Filters */}
-          <div className="card mb-4 border-0 shadow-sm">
-            <div className="card-body p-3">
-              <div className="relative flex-1">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  placeholder="Search variants..."
-                  className="form-control ps-10 border-slate-200"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="relative w-full md:w-2/3">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Search by name, mobile or email..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="text-sm font-medium text-slate-500">
+              Total:{" "}
+              <span className="text-slate-800">{filteredVariants.length}</span>
             </div>
           </div>
 
@@ -474,6 +475,20 @@ const Variants = () => {
         title="Delete Variant?"
         message="Are you sure you want to delete this SKU?"
       />
+
+      {/* Add this right after your table card */}
+      {hasNext && (
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={() => loadVariants(cursor)} // Passes the cursor to the API
+            disabled={loading}
+            className="btn btn-outline-primary px-8 flex align-items-center gap-2"
+          >
+            {loading ? "Loading..." : "Load More Variants"}
+            {!loading && <ChevronRight size={18} />}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
