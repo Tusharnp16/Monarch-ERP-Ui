@@ -11,6 +11,7 @@ import Inventory from "./pages/Inventory";
 import OrderCard from "./pages/OrderCard";
 import StockMaster from "./pages/StockMaster";
 import LoginHistory from "./pages/LoginHistory";
+import Contacts from "./pages/Contacts";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,7 @@ const router = createBrowserRouter([
       { path: "inventory", element: <Inventory /> },
       { path: "stockmaster", element: <StockMaster /> },
       { path: "purchase", element: <OrderCard /> },
-      { path: "contacts", element: <Products /> },
+      { path: "contacts", element: <Contacts /> },
       { path: "purchase/report", element: <Products /> },
       { path: "customers", element: <Products /> },
       { path: "salesinvoice", element: <Products /> },
