@@ -15,6 +15,7 @@ import Contacts from "./pages/Contacts";
 import Customers from "./pages/Customers";
 import { AuthProvider } from "./api/AuthContext";
 import ProtectedRoute from "./api/ProtectedRoute";
+import InventoryAlert from "./components/InventoryAlert";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <AuthProvider>
+      <InventoryAlert />
       <RouterProvider router={router} />
     </AuthProvider>
   );
