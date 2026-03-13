@@ -149,7 +149,7 @@ const Products = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await APICon.delete(`${API}/${idToDelete}`);
+      await APi.delete(`${API}/${idToDelete}`);
       setShowDeleteModal(false);
       setIdToDelete(null);
       loadProducts(currentPage);
@@ -289,7 +289,7 @@ const Products = () => {
                     products.map((p, i) => (
                       <tr key={p.productId}>
                         <td className="ps-3 text-muted">
-                          {currentPage * 20 + (i + 1)}
+                          {currentPage * 10 + (i + 1)}
                         </td>
                         <td>
                           <strong>{p.productName}</strong>
