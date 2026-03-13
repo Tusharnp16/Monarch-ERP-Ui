@@ -13,6 +13,8 @@ const useFetch = (url) => {
     "Well, this is awkward. The internet just sneezed.",
     "Great Scott! We've hit a temporal anomaly in the product catalog.",
     "It's not you, it's us. We're currently questioning our life choices.",
+    "It's not you, it's us. Actually, it's definitely us.",
+    "Houston, we have a problem. And by 'problem', we mean this button is broken.",
   ];
 
   useEffect(() => {

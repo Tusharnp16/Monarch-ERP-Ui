@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import API from "../api/AxiosConfig";
 import "../styles/Login.css";
 import { AlertCircle } from "lucide-react";
+import { useAuth } from "../api/AuthContext";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -12,6 +13,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -26,15 +29,25 @@ const Login = () => {
       const response = await API.post("/auth/login", credentials);
       const { accessToken, refreshToken } = response.data;
 
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("userName", credentials.username);
+      // localStorage.setItem("accessToken", accessToken);
+      // localStorage.setItem("refreshToken", refreshToken);
+      // localStorage.setItem("userName", credentials.username);
+
+      login(
+        { name: credentials.username },
+        {
+          accessToken,
+          refreshToken,
+        },
+      );
 
       navigate("/products");
     } catch (err) {
       if (err.response) {
         if (err.response.status === 500) {
-          setError("Server is currently unavailable. Please try again later.");
+          setError(
+            "The servers are having a mid-life crisis. Please be patient.",
+          );
         } else {
           setError("Invalid username or password. Please try again.");
         }
@@ -70,8 +83,6 @@ const Login = () => {
           <h2>Welcome Back</h2>
           <p className="subtitle">Sign in to continue</p>
 
-          {error && <div className="error-message">{error}</div>}
-
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <input
@@ -99,6 +110,15 @@ const Login = () => {
               {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
+
+          {error && (
+            <div
+              className="error-message"
+              style={{ marginBottom: "20px", marginTop: "10px" }}
+            >
+              {error}
+            </div>
+          )}
 
           <div className="login-footer">
             Don’t have an account?

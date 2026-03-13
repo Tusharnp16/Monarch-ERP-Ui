@@ -13,6 +13,8 @@ import StockMaster from "./pages/StockMaster";
 import LoginHistory from "./pages/LoginHistory";
 import Contacts from "./pages/Contacts";
 import Customers from "./pages/Customers";
+import { AuthProvider } from "./api/AuthContext";
+import ProtectedRoute from "./api/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -22,7 +24,11 @@ const router = createBrowserRouter([
   { path: "/register", element: <Register /> },
   {
     path: "/",
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Products /> },
       { path: "products", element: <Products /> },
@@ -42,7 +48,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;
