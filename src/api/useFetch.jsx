@@ -3,7 +3,7 @@ import API from "./AxiosConfig";
 import axios from "axios";
 
 const useFetch = (url) => {
-  //   const urll = null;
+  const urll = null;
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

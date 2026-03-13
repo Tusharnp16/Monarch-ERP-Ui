@@ -4,7 +4,6 @@ import useFetch from "../api/useFetch"; // Fixed Import
 const LoginHistory = () => {
   const API_ENDPOINT = "/userlogs";
 
-  // Use the hook states directly
   const { data, isLoading, error, reFetch } = useFetch(API_ENDPOINT);
 
   // Safely extract logs and username based on your API structure
