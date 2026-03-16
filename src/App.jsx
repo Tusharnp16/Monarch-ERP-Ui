@@ -6,16 +6,19 @@ import Login from "./pages/login";
 import NotFound from "./pages/NotFound";
 import AppErrorBoundary from "./pages/AppErrorBoundary";
 import Register from "./pages/Register";
-import Inventory from "./pages/Inventory";
-import OrderCard from "./pages/OrderCard";
-import StockMaster from "./pages/StockMaster";
-import LoginHistory from "./pages/LoginHistory";
-import Contacts from "./pages/Contacts";
-import Customers from "./pages/Customers";
+
 import { AuthProvider } from "./api/AuthContext";
 import ProtectedRoute from "./api/ProtectedRoute";
 import InventoryAlert from "./components/InventoryAlert";
-import Variants from "./pages/Variants";
+import { Suspense, lazy } from "react";
+
+const Variants = lazy(() => import("./pages/Variants"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const OrderCard = lazy(() => import("./pages/OrderCard"));
+const StockMaster = lazy(() => import("./pages/StockMaster"));
+const Contacts = lazy(() => import("./pages/Contacts"));
+const Customers = lazy(() => import("./pages/Customers"));
+const LoginHistory = lazy(() => import("./pages/LoginHistory"));
 
 const router = createBrowserRouter([
   {
@@ -52,7 +55,9 @@ function App() {
   return (
     <AuthProvider>
       <InventoryAlert />
-      <RouterProvider router={router} />
+      <Suspense fallback={<div className="loader">Loading...</div>}>
+        <RouterProvider router={router} />
+      </Suspense>
     </AuthProvider>
   );
 }
