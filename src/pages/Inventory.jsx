@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import {
   Printer,
   RefreshCw,
@@ -17,7 +17,7 @@ const Inventory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState({ total: 0, low: 0, out: 0 });
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     fetchInventory(true);
@@ -161,7 +161,7 @@ const Inventory = () => {
                         key={item.inventoryId}
                         item={item}
                         index={idx + 1}
-                        navigate={navigate}
+                        // navigate={navigate}
                         color={
                           item.availableQuantity <= 0
                             ? "red"
@@ -191,16 +191,26 @@ const Inventory = () => {
 };
 
 // Helper Components
-const StatCard = ({ title, value, color, textColor = "text-gray-900" }) => (
-  <div className={`bg-white p-4 rounded-lg border-l-4 shadow-sm ${color}`}>
-    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-      {title}
-    </p>
-    <p className={`text-2xl font-bold mt-1 ${textColor}`}>{value}</p>
-  </div>
+const StatCard = memo(
+  ({ title, value, color, textColor = "text-gray-900" }) => (
+    console.log(`StatCard Rendered: ${title}`),
+    (
+      <div className={`bg-white p-4 rounded-lg border-l-4 shadow-sm ${color}`}>
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+          {title}
+        </p>
+        <p className={`text-2xl font-bold mt-1 ${textColor}`}>{value}</p>
+      </div>
+    )
+  ),
 );
 
-const InventoryRow = ({ item, index, navigate }) => {
+const InventoryRow = memo(({ item, index }) => {
+  const navigate = useNavigate();
+
+  console.log(
+    `InventoryRaw Rendered: ${item.variant?.variantName || "Unknown Variant"}`,
+  );
   const avail = item.availableQuantity;
   const variantName = item.variant?.variantName || "Removed";
   const sku = item.variant?.product?.itemCode || "N/A";
@@ -266,6 +276,6 @@ const InventoryRow = ({ item, index, navigate }) => {
       </td>
     </tr>
   );
-};
+});
 
 export default Inventory;

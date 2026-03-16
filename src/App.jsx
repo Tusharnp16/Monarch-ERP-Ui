@@ -6,7 +6,6 @@ import Login from "./pages/login";
 import NotFound from "./pages/NotFound";
 import AppErrorBoundary from "./pages/AppErrorBoundary";
 import Register from "./pages/Register";
-import Variants from "./pages/Variants";
 import Inventory from "./pages/Inventory";
 import OrderCard from "./pages/OrderCard";
 import StockMaster from "./pages/StockMaster";
@@ -16,6 +15,7 @@ import Customers from "./pages/Customers";
 import { AuthProvider } from "./api/AuthContext";
 import ProtectedRoute from "./api/ProtectedRoute";
 import InventoryAlert from "./components/InventoryAlert";
+import Variants from "./pages/Variants";
 
 const router = createBrowserRouter([
   {
