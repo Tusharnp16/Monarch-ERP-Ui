@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AsyncSelect from "react-select/async";
 import API from "../api/AxiosConfig";
+import Portal from "../components/Portal";
 
 const VariantModal = ({ variant, onClose, onRefresh }) => {
   const [formData, setFormData] = useState({
@@ -128,165 +129,169 @@ const VariantModal = ({ variant, onClose, onRefresh }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content-container">
-        <div className="modal-header-custom">
-          <h3 className="modal-title-text">
-            {variant ? "Edit Variant" : "Create New Variant"}
-          </h3>
-          <button onClick={onClose} className="close-x-btn">
-            &times;
-          </button>
+    <Portal>
+      <div className="modal-overlay">
+        <div className="modal-content-container">
+          <div className="modal-header-custom">
+            <h3 className="modal-title-text">
+              {variant ? "Edit Variant" : "Create New Variant"}
+            </h3>
+            <button onClick={onClose} className="close-x-btn">
+              &times;
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="modal-form-body">
+            <div className="mb-3">
+              <label className="text-muted-small mb-1 d-block text-left">
+                Parent Product
+              </label>
+              <AsyncSelect
+                cacheOptions
+                defaultOptions
+                value={formData.productId}
+                loadOptions={loadProductOptions}
+                onChange={(opt) => setFormData({ ...formData, productId: opt })}
+                placeholder="Search product..."
+                classNamePrefix="react-select"
+              />
+            </div>
+            <div className="mb-3 text-center">
+              <label className="text-muted-small mb-1 d-block text-left">
+                Variant Image
+              </label>
+              <div className="image-upload-wrapper border rounded p-3 bg-light">
+                {previewUrl ? (
+                  <div className="position-relative d-inline-block">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="img-thumbnail mb-2"
+                      style={{ maxHeight: "150px" }}
+                    />
+
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
+                      onClick={() => {
+                        setPreviewUrl(null);
+                        setSelectedFile(null);
+                        setIsImageDeleted(true); // Mark for deletion on backend
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ) : (
+                  <div className="py-4 text-slate-400">No image selected</div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="form-control form-control-sm"
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="text-muted-small mb-1 d-block text-left">
+                Variant Name
+              </label>
+              <input
+                type="text"
+                required
+                className="form-control"
+                value={formData.variantName}
+                onChange={(e) =>
+                  setFormData({ ...formData, variantName: e.target.value })
+                }
+                placeholder="e.g. XL - Blue"
+              />
+            </div>
+
+            <div className="row g-3 mb-3">
+              <div className="col-6">
+                <label className="text-muted-small mb-1 d-block text-left">
+                  Colour
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.colour}
+                  onChange={(e) =>
+                    setFormData({ ...formData, colour: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-6">
+                <label className="text-muted-small mb-1 d-block text-left">
+                  Size
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.size}
+                  onChange={(e) =>
+                    setFormData({ ...formData, size: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="row g-3">
+              <div className="col-6">
+                <label className="text-muted-small mb-1 d-block text-left">
+                  MRP
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  className="form-control"
+                  value={formData.mrp}
+                  onChange={(e) =>
+                    setFormData({ ...formData, mrp: e.target.value })
+                  }
+                />
+              </div>
+              <div className="col-6">
+                <label className="text-muted-small mb-1 d-block text-left">
+                  Selling Price
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  className={`form-control ${error ? "is-invalid" : ""}`}
+                  value={formData.sellingPrice}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sellingPrice: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-danger small mt-2 text-left">{error}</p>
+            )}
+
+            <div className="modal-footer-custom mt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn btn-light me-2"
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                {variant ? "Update Variant" : "Save Variant"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="modal-form-body">
-          <div className="mb-3">
-            <label className="text-muted-small mb-1 d-block text-left">
-              Parent Product
-            </label>
-            <AsyncSelect
-              cacheOptions
-              defaultOptions
-              value={formData.productId}
-              loadOptions={loadProductOptions}
-              onChange={(opt) => setFormData({ ...formData, productId: opt })}
-              placeholder="Search product..."
-              classNamePrefix="react-select"
-            />
-          </div>
-          <div className="mb-3 text-center">
-            <label className="text-muted-small mb-1 d-block text-left">
-              Variant Image
-            </label>
-            <div className="image-upload-wrapper border rounded p-3 bg-light">
-              {previewUrl ? (
-                <div className="position-relative d-inline-block">
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="img-thumbnail mb-2"
-                    style={{ maxHeight: "150px" }}
-                  />
-
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
-                    onClick={() => {
-                      setPreviewUrl(null);
-                      setSelectedFile(null);
-                      setIsImageDeleted(true); // Mark for deletion on backend
-                    }}
-                  >
-                    &times;
-                  </button>
-                </div>
-              ) : (
-                <div className="py-4 text-slate-400">No image selected</div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="form-control form-control-sm"
-                onChange={handleFileChange}
-              />
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="text-muted-small mb-1 d-block text-left">
-              Variant Name
-            </label>
-            <input
-              type="text"
-              required
-              className="form-control"
-              value={formData.variantName}
-              onChange={(e) =>
-                setFormData({ ...formData, variantName: e.target.value })
-              }
-              placeholder="e.g. XL - Blue"
-            />
-          </div>
-
-          <div className="row g-3 mb-3">
-            <div className="col-6">
-              <label className="text-muted-small mb-1 d-block text-left">
-                Colour
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.colour}
-                onChange={(e) =>
-                  setFormData({ ...formData, colour: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-6">
-              <label className="text-muted-small mb-1 d-block text-left">
-                Size
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.size}
-                onChange={(e) =>
-                  setFormData({ ...formData, size: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="row g-3">
-            <div className="col-6">
-              <label className="text-muted-small mb-1 d-block text-left">
-                MRP
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                required
-                className="form-control"
-                value={formData.mrp}
-                onChange={(e) =>
-                  setFormData({ ...formData, mrp: e.target.value })
-                }
-              />
-            </div>
-            <div className="col-6">
-              <label className="text-muted-small mb-1 d-block text-left">
-                Selling Price
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                required
-                className={`form-control ${error ? "is-invalid" : ""}`}
-                value={formData.sellingPrice}
-                onChange={(e) =>
-                  setFormData({ ...formData, sellingPrice: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          {error && <p className="text-danger small mt-2 text-left">{error}</p>}
-
-          <div className="modal-footer-custom mt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn-light me-2"
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {variant ? "Update Variant" : "Save Variant"}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </Portal>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Search, Pencil, Trash2, Phone, Mail } from "lucide-react";
 import API from "../api/AxiosConfig";
 import CustomerModal from "./CustomerForm";
+import Portal from "../components/Portal";
 
 const API_URL = "/customers";
 
@@ -191,37 +192,41 @@ const Customers = () => {
       </main>
 
       {/* --- MODALS --- */}
-      <CustomerModal
-        isOpen={modalConfig.isOpen}
-        mode={modalConfig.mode}
-        initialData={modalConfig.data}
-        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
-        onSave={handleSave}
-      />
+      <Portal>
+        <CustomerModal
+          isOpen={modalConfig.isOpen}
+          mode={modalConfig.mode}
+          initialData={modalConfig.data}
+          onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+          onSave={handleSave}
+        />
 
-      {/* Simplified Delete Modal logic */}
-      {isDeleteOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in duration-200 shadow-2xl">
-            <h3 className="text-xl font-bold text-slate-800">Delete?</h3>
-            <p className="text-slate-500 my-4">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setIsDeleteOpen(false)}
-                className="flex-1 py-2 border rounded-lg hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold"
-              >
-                Delete
-              </button>
+        {/* Simplified Delete Modal logic */}
+        {isDeleteOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in duration-200 shadow-2xl">
+              <h3 className="text-xl font-bold text-slate-800">Delete?</h3>
+              <p className="text-slate-500 my-4">
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsDeleteOpen(false)}
+                  className="flex-1 py-2 border rounded-lg hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Portal>
 
       {/* Toast Notification Container */}
       {notice && (
