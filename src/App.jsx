@@ -11,6 +11,7 @@ import { AuthProvider } from "./api/AuthContext";
 import ProtectedRoute from "./api/ProtectedRoute";
 import InventoryAlert from "./components/InventoryAlert";
 import { Suspense, lazy } from "react";
+import PurchasesPage from "./pages/Purchase";
 
 const Variants = lazy(() => import("./pages/Variants"));
 const Inventory = lazy(() => import("./pages/Inventory"));
@@ -39,7 +40,7 @@ const router = createBrowserRouter([
       { path: "variants", element: <Variants /> },
       { path: "inventory", element: <Inventory /> },
       { path: "stockmaster", element: <StockMaster /> },
-      { path: "purchase", element: <OrderCard /> },
+      { path: "purchase", element: <PurchasesPage /> },
       { path: "contacts", element: <Contacts /> },
       { path: "purchase/report", element: <Products /> },
       { path: "customers", element: <Customers /> },
