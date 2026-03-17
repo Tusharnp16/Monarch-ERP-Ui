@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Contact,
+  UserPlus,
+  Info,
+  Phone,
+  BadgeCheck,
+} from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import API from "../api/AxiosConfig";
 
 const API_URL = "/contacts";
@@ -20,22 +31,14 @@ const Contacts = () => {
   });
   const [selectedId, setSelectedId] = useState(null);
 
-  const [notice, setNotice] = useState(null);
-
-  const showNotice = (msg, isError = false) => {
-    setNotice({ msg, isError });
-    setTimeout(() => setNotice(null), 3000);
-  };
-
   const fetchContacts = async () => {
     setLoading(true);
     try {
       const res = await API.get(API_URL);
-
       const data = res.data?.data || res.data || [];
       setContacts(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to fetch:", err);
+      toast.error("Failed to load contacts");
       setContacts([]);
     } finally {
       setLoading(false);
@@ -47,27 +50,26 @@ const Contacts = () => {
     try {
       if (selectedId) {
         await API.put(`${API_URL}/${selectedId}`, formData);
-        showNotice("Customer updated successfully");
+        toast.success("Contact updated successfully");
       } else {
         await API.post(API_URL, formData);
-        showNotice("Customer added successfully");
+        toast.success("New contact added");
       }
       closeModals();
       fetchContacts();
     } catch (err) {
-      console.error("Save failed:", err);
+      toast.error(err.response?.data?.message || "Operation failed");
     }
   };
 
   const handleDelete = async () => {
     try {
       await API.delete(`${API_URL}/${selectedId}`);
+      toast.success("Contact permanently deleted");
       setShowDeleteModal(false);
-      showNotice("Customer deleted successfully");
       fetchContacts();
     } catch (err) {
-      console.error("Delete failed:", err);
-      showNotice("Failed to delete customer", true);
+      toast.error("Failed to delete contact");
     }
   };
 
@@ -92,219 +94,285 @@ const Contacts = () => {
     : [];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <main className="flex-1">
-        <header className="flex justify-between items-center p-4 bg-white border-b shadow-sm">
-          <h1 className="text-xl font-semibold text-slate-800">Contacts</h1>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      <Toaster position="bottom-right" />
+
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <Contact className="mr-3 text-blue-600" /> Contacts Directory
+          </h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors"
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-lg active:scale-95"
           >
-            <Plus size={18} /> Add Contact
+            <UserPlus size={18} /> Add Contact
           </button>
-        </header>
+        </div>
 
-        <div className="p-6">
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        {/* Compact Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 p-3 flex items-center">
+            <div className="bg-blue-50 text-blue-600 rounded-lg p-2 mr-3">
+              <Contact size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-none mb-1">
+                Total Contacts
+              </p>
+              <p className="text-xl font-black text-gray-800 leading-none">
+                {contacts.length}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-gray-300 p-3 flex items-center md:col-span-2 opacity-80">
+            <Info size={16} className="text-gray-400 mr-2" />
+            <p className="text-[11px] text-gray-500 italic leading-tight">
+              Manage external contacts and vendor information. All updates are
+              synced across the billing system.
+            </p>
+          </div>
+        </div>
+
+        {/* Main Card */}
+        <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
+          {/* Search Row */}
+          <div className="p-4 border-b bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="relative w-full md:w-1/2">
               <Search
-                className="absolute left-3 top-2.5 text-gray-400"
-                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
               />
               <input
-                className="pl-10 pr-4 py-2 border rounded-md w-full focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                placeholder="Search contacts..."
+                type="text"
+                placeholder="Search by name, mobile, or GST..."
+                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="text-gray-600 font-medium">
-              Total:{" "}
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              Found:{" "}
               <span className="text-blue-600">{filteredContacts.length}</span>
-            </div>
+            </span>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="p-4 font-semibold text-gray-600 uppercase text-xs">
-                    #
-                  </th>
-                  <th className="p-4 font-semibold text-gray-600 uppercase text-xs">
-                    Name
-                  </th>
-                  <th className="p-4 font-semibold text-gray-600 uppercase text-xs">
-                    Mobile
-                  </th>
-                  <th className="p-4 font-semibold text-gray-600 uppercase text-xs">
-                    GST
-                  </th>
-                  <th className="p-4 font-semibold text-gray-600 uppercase text-xs text-right">
-                    Actions
-                  </th>
+              <thead>
+                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
+                  <th className="py-4 px-6">No.</th>
+                  <th className="py-4 px-2">Contact Name</th>
+                  <th className="py-4 px-2">Mobile Number</th>
+                  <th className="py-4 px-2 text-center">GST Status</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="text-sm">
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="p-12 text-center text-gray-400">
-                      Loading contacts...
+                    <td colSpan="5" className="py-20 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <span className="text-gray-400 italic font-medium">
+                          Syncing directory...
+                        </span>
+                      </div>
                     </td>
                   </tr>
-                ) : filteredContacts.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="p-12 text-center text-gray-400">
-                      No contacts found.
-                    </td>
-                  </tr>
-                ) : (
+                ) : filteredContacts.length > 0 ? (
                   filteredContacts.map((contact, index) => (
                     <tr
                       key={contact.contactId || index}
-                      className="hover:bg-blue-50/30 transition-colors group"
+                      className="border-t hover:bg-blue-50/30 transition-colors group"
                     >
-                      <td className="p-4 text-gray-500">{index + 1}</td>
-                      <td className="p-4 font-medium text-gray-900">
+                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors">
+                        {String(index + 1).padStart(2, "0")}
+                      </td>
+                      <td className="py-4 px-2 font-bold text-gray-800">
                         {contact.name}
                       </td>
-                      <td className="p-4 text-gray-600">{contact.mobileno}</td>
-                      <td className="p-4 text-gray-600">{contact.gstIn}</td>
-                      <td className="p-4 text-right space-x-2">
-                        <button
-                          onClick={() => {
-                            setFormData(contact);
-                            setSelectedId(contact.contactId);
-                            setShowEditModal(true);
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                      <td className="py-4 px-2">
+                        <div className="flex items-center text-gray-600">
+                          <Phone size={14} className="mr-2 text-blue-500" />
+                          <span className="font-medium">
+                            {contact.mobileno}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-2 text-center">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono border ${contact.gstIn ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 text-gray-500 border-gray-100"}`}
                         >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedId(contact.contactId);
-                            setShowDeleteModal(true);
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                          {contact.gstIn ? (
+                            <>
+                              <BadgeCheck size={10} className="mr-1" />{" "}
+                              {contact.gstIn}
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              setFormData(contact);
+                              setSelectedId(contact.contactId);
+                              setShowEditModal(true);
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedId(contact.contactId);
+                              setShowDeleteModal(true);
+                            }}
+                            className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="py-20 text-center text-gray-400 italic"
+                    >
+                      No contacts found matching your search.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
-      </main>
+      </div>
 
+      {/* --- FORM MODAL --- */}
       {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <form
             onSubmit={handleSave}
-            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border-t-8 border-blue-600"
           >
-            <div className="p-6 border-b font-bold text-xl text-slate-800">
-              {showEditModal ? "Edit Contact" : "Add New Contact"}
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  required
-                  className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-blue-100 text-blue-600 p-3 rounded-xl">
+                  <UserPlus size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-gray-800 text-lg uppercase tracking-tight">
+                    {showEditModal ? "Modify Contact" : "Add New Contact"}
+                  </h3>
+                  <p className="text-xs text-gray-400 font-medium italic">
+                    Enter details below to update the directory
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile Number
-                </label>
-                <input
-                  required
-                  className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.mobileno}
-                  maxLength={10}
-                  onChange={(e) =>
-                    setFormData({ ...formData, mobileno: e.target.value })
-                  }
-                />
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter name..."
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                    Mobile Number
+                  </label>
+                  <input
+                    required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="10-digit mobile"
+                    value={formData.mobileno}
+                    maxLength={10}
+                    onChange={(e) =>
+                      setFormData({ ...formData, mobileno: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                    GST Registration
+                  </label>
+                  <input
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Optional GSTIN"
+                    value={formData.gstIn}
+                    onChange={(e) =>
+                      setFormData({ ...formData, gstIn: e.target.value })
+                    }
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  GST Registration
-                </label>
-                <input
-                  required
-                  className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={formData.gstIn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gstIn: e.target.value })
-                  }
-                />
+
+              <div className="flex gap-3 mt-8">
+                <button
+                  type="button"
+                  onClick={closeModals}
+                  className="flex-1 px-4 py-3 text-sm font-bold text-gray-400 hover:text-gray-600 transition"
+                >
+                  Go Back
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition"
+                >
+                  {showEditModal ? "Update Profile" : "Save Contact"}
+                </button>
               </div>
-            </div>
-            <div className="p-6 bg-gray-50 flex gap-3">
-              <button
-                type="button"
-                onClick={closeModals}
-                className="flex-1 py-2.5 border border-gray-300 bg-white hover:bg-gray-100 rounded-lg font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md transition-colors"
-              >
-                {showEditModal ? "Update" : "Save"}
-              </button>
             </div>
           </form>
         </div>
       )}
 
+      {/* --- DELETE MODAL --- */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={32} />
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center animate-in zoom-in-95 duration-200 border-t-8 border-red-500">
+            <div className="bg-red-50 text-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={24} />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Are you sure?
+            <h3 className="text-xl font-black text-gray-800 uppercase tracking-tight">
+              Remove Contact?
             </h3>
-            <p className="text-gray-500 mb-6">
-              This action cannot be undone. This contact will be permanently
-              deleted.
+            <p className="text-gray-500 text-sm my-4">
+              Deleting this record will remove it from the directory
+              permanently.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={closeModals}
-                className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 py-2 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition"
               >
-                Delete
+                Confirm Delete
               </button>
             </div>
           </div>
-        </div>
-      )}
-      {notice && (
-        <div
-          className={`fixed bottom-6 right-6 z-[100] px-6 py-3 rounded-xl shadow-2xl text-white font-medium animate-in slide-in-from-right duration-300 ${notice.isError ? "bg-red-600" : "bg-green-600"}`}
-        >
-          {notice.msg}
         </div>
       )}
     </div>
