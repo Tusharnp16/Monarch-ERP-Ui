@@ -21,6 +21,7 @@ const Contacts = lazy(() => import("./pages/Contacts"));
 const Customers = lazy(() => import("./pages/Customers"));
 const LoginHistory = lazy(() => import("./pages/LoginHistory"));
 const RecentSales = lazy(() => import("./pages/RecentSales"));
+const SalesInvoice = lazy(() => import("./pages/SalesInvoice"));
 
 const router = createBrowserRouter([
   {
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
       { path: "contacts", element: <Contacts /> },
       { path: "purchase/report", element: <Products /> },
       { path: "customers", element: <Customers /> },
-      { path: "sales", element: <Products /> },
+      { path: "sales", element: <SalesInvoice /> },
       { path: "salesreport", element: <RecentSales /> },
       { path: "userlogs", element: <LoginHistory /> },
       { path: "*", element: <NotFound /> },
