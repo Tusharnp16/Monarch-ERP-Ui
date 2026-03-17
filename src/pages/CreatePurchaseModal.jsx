@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, X, Trash2 } from "lucide-react";
+import API from "../api/AxiosConfig";
 
 const CreatePurchaseModal = ({ onClose, onSuccess }) => {
   const [billNo, setBillNo] = useState("");
@@ -23,16 +24,32 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
   const IGST_RATE = 0.18;
 
   useEffect(() => {
-    // Fetch Metadata
-    fetch("/api/purchase/next-number")
-      .then((res) => res.text())
-      .then(setBillNo);
-    fetch("/api/contacts/lookup")
-      .then((res) => res.json())
-      .then((data) => setSuppliers(data.data || []));
-    fetch("/api/variants/lookup")
-      .then((res) => res.json())
-      .then((data) => setVariants(data.data || []));
+    const loadMetadata = async () => {
+      try {
+        const [billRes, supRes, varRes] = await Promise.all([
+          API.get("/purchase/next-number"),
+          API.get("/contacts/lookup"),
+          API.get("/variants/lookup"),
+        ]);
+
+        setBillNo(billRes.data);
+        setSuppliers(supRes.data.data || []);
+        setVariants(varRes.data.data || []);
+
+        // const billRes = await API.get("/purchase/next-number");
+        // setBillNo(billRes.data);
+
+        // const supRes = await API.get("/contacts/lookup");
+        // setSuppliers(supRes.data.data || []);
+
+        // const varRes = await API.get("/variants/lookup");
+        // setVariants(varRes.data.data || []);
+      } catch (err) {
+        console.error("Metadata load failed:", err);
+      }
+    };
+
+    loadMetadata();
   }, []);
 
   const handleSupplierChange = (e) => {
@@ -78,13 +95,27 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
       })),
     };
 
-    const res = await fetch(`/api/purchase/add?gstIn=${gstIn}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const result = await res.json();
-    if (result.success) onSuccess();
+    // const res = await fetch(`/api/purchase/add?gstIn=${gstIn}`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(payload),
+    // });
+    // const result = await res.json();
+    // if (result.success) onSuccess();
+
+    try {
+      const res = await API.post(`/purchase/add`, payload, {
+        params: { gstIn: gstIn },
+      });
+
+      if (res.data.success) {
+        onSuccess();
+      } else {
+        console.error("API Error:", res.data);
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+    }
   };
 
   return (
@@ -101,7 +132,7 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
                 className={`badge ms-2 ${gstIn === "24" ? "bg-success" : "bg-primary"}`}
               >
                 {gstIn
-                  ? gstIn === "24"
+                  ? gstIn === 24
                     ? "InterState"
                     : "OuterState"
                   : "Select Supplier"}
@@ -218,6 +249,7 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
                         <input
                           type="date"
                           className="form-control"
+                          min={new Date().toISOString().split("T")[0]}
                           onChange={(e) =>
                             updateItem(item.id, "expiry", e.target.value)
                           }
@@ -240,7 +272,8 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
               </table>
               <button
                 type="button"
-                className="btn btn-sm btn-outline-success"
+                className="btn btn-sm d-flex btn-outline-success align-items-center mt-3"
+                // btn btn-primary d-flex align-items-center
                 onClick={() =>
                   setItems([
                     ...items,

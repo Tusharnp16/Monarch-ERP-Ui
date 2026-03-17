@@ -19,7 +19,6 @@ const PurchaseTable = ({ purchases, loading }) => {
     if (!itemDetails[purchaseId]) {
       try {
         const res = await API.get(`/purchaseitem/pr/${purchaseId}`);
-        console.log("Fetching items for purchase ID:", res.data);
         if (res.data.success) {
           setItemDetails((prev) => ({ ...prev, [purchaseId]: res.data.data }));
         }
@@ -117,10 +116,14 @@ const PurchaseTable = ({ purchases, loading }) => {
                                   </span>
                                 </td>
                                 <td className="text-center">{item.qty}</td>
-                                <td>₹ {item.unitPrice?.toLocaleString()}</td>
-                                <td>₹ {item.taxAmount?.toLocaleString()}</td>
+                                <td>
+                                  ₹ {item.unitPrice?.toLocaleString("en-IN")}
+                                </td>
+                                <td>
+                                  ₹ {item.taxAmount?.toLocaleString("en-IN")}
+                                </td>
                                 <td className="fw-bold">
-                                  ₹ {item.netAmount?.toLocaleString()}
+                                  ₹ {item.netAmount?.toLocaleString("en-IN")}
                                 </td>
                               </tr>
                             ))

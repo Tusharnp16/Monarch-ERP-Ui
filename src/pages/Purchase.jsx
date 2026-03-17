@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PurchaseTable from "./PurchaseTable";
 import CreatePurchaseModal from "./CreatePurchaseModal";
 import { PlusCircle, FileText } from "lucide-react";
+import API from "../api/AxiosConfig";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState([]);
@@ -10,9 +11,8 @@ const Purchases = () => {
 
   const fetchPurchases = async () => {
     try {
-      const res = await fetch("/api/purchase");
-      const response = await res.json();
-      if (response.success) setPurchases(response.data);
+      const res = await API.get("/purchase");
+      if (res.data.success) setPurchases(res.data.data);
     } catch (err) {
       console.error("Error fetching purchases:", err);
     } finally {
@@ -26,7 +26,6 @@ const Purchases = () => {
 
   return (
     <div className="d-flex min-vh-100 bg-light">
-      {/* Sidebar would be a separate component */}
       <main className="flex-grow-1">
         <div className="bg-white border-bottom p-3 d-flex justify-content-between align-items-center sticky-top">
           <div>
@@ -34,7 +33,7 @@ const Purchases = () => {
             <small className="text-primary">Procurement / Invoices</small>
           </div>
           <button
-            className="btn btn-primary shadow-sm"
+            className="btn btn-primary d-flex align-items-center"
             onClick={() => setShowModal(true)}
           >
             <PlusCircle size={18} className="me-1" /> Create Bill
