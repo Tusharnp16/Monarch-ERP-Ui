@@ -26,15 +26,14 @@ const Sidebar = () => {
     { path: "/stockmaster", icon: "fas fa-chart-line", label: "Stock Master" },
     { path: "/purchase", icon: "fas fa-shopping-cart", label: "Purchase" },
     { path: "/contacts", icon: "fas fa-address-book", label: "Contact" },
-    { path: "/purchase/report", icon: "fas fa-file-alt", label: "Report" },
     { path: "/customers", icon: "fas fa-user-friends", label: "Customer" },
     {
-      path: "/salesinvoice",
+      path: "/sales",
       icon: "fas fa-file-invoice-dollar",
       label: "Sales",
     },
     {
-      path: "/salesitem/recentitems",
+      path: "/salesreport",
       icon: "fas fa-history",
       label: "Recent Sales",
     },
