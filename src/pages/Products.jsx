@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
-import "../styles/products.css";
-
 import {
   Plus,
   Search,
   Edit,
-  Trash,
+  Trash2,
   PackageOpen,
   ChevronLeft,
   ChevronRight,
+  Database,
+  Calendar,
+  RefreshCw,
 } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import APICon from "../api/AxiosConfig";
 import ProductForm from "./ProductForm";
 import DeleteModal from "./DeleteModal";
@@ -28,59 +30,16 @@ const Products = () => {
   const [idToDelete, setIdToDelete] = useState(null);
   const [error, setError] = useState(null);
 
-  // Filters
   const [filters, setFilters] = useState({
     search: "",
     startDate: "",
     endDate: "",
   });
 
-  const handleSave = async (formData) => {
-    try {
-      if (editingProduct) {
-        await APICon.put(`${API}/${editingProduct.productId}`, formData);
-      } else {
-        await APICon.post(API, formData);
-      }
-      setShowForm(false);
-      setEditingProduct(null);
-      loadProducts(currentPage);
-    } catch (err) {
-      console.log("Error saving product:", err.response?.data || err.message);
-    }
-  };
-
-  // http://localhost:8080/api/products
-
-  //   const loadProducts = useCallback(async (page = 0) => {
-  //     setLoading(true);
-  //     const params = new URLSearchParams({
-  //       page: page,
-  //       size: 20,
-  //       search: filters.search,
-  //       startDate: filters.startDate,
-  //       endDate: filters.endDate
-  //     });
-
-  //     try {
-  //       const res = await fetch(`${API}?${params.toString()}`);
-  //       const result = await res.json();
-  //       if (result.data) {
-  //         setProducts(result.data.content);
-  //         setTotalElements(result.data.totalElements);
-  //         setTotalPages(result.data.totalPages);
-  //         setCurrentPage(result.data.number);
-  //       }
-  //     } catch (err) {
-  //       console.error("Fetch error:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }, [filters]);
-
   const loadProducts = useCallback(
     async (page = 0) => {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams({
         page: page,
         size: 10,
@@ -100,39 +59,22 @@ const Products = () => {
           setCurrentPage(result.data.number);
         }
       } catch (err) {
-        console.error("Fetch error:", err.response?.data || err.message);
-        if (!err.response) {
-          setError(
-            "Server is currently unreachable. Please check your connection or try again later.",
-          );
-        } else {
-          setError("Failed to load products due to a server error (500).");
-        }
+        const errMsg = err.response
+          ? "Server error (500). Failed to load products."
+          : "Server is currently unreachable.";
+        setError(errMsg);
+        toast.error(errMsg);
       } finally {
         setLoading(false);
       }
     },
-    [filters, API],
+    [filters],
   );
-
-  // Trigger load on filter change or page change
-  //   useEffect(() => {
-  //     const delayDebounceFn = setTimeout(() => {
-  //       loadProducts(0);
-  //     }, 500); // Debounce search
-
-  //     return () => clearTimeout(delayDebounceFn);
-  //   }, [filters.search, loadProducts]);
-
-  //   useEffect(() => {
-  //       loadProducts(currentPage);
-  //   }, [filters.startDate, filters.endDate, currentPage, loadProducts]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       loadProducts(currentPage);
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
   }, [filters, currentPage, loadProducts]);
 
@@ -142,6 +84,23 @@ const Products = () => {
     setCurrentPage(0);
   };
 
+  const handleSave = async (formData) => {
+    try {
+      if (editingProduct) {
+        await APICon.put(`${API}/${editingProduct.productId}`, formData);
+        toast.success("Product updated successfully");
+      } else {
+        await APICon.post(API, formData);
+        toast.success("New product added to catalog");
+      }
+      setShowForm(false);
+      setEditingProduct(null);
+      loadProducts(currentPage);
+    } catch (err) {
+      toast.error("Failed to save product");
+    }
+  };
+
   const promptDelete = (id) => {
     setIdToDelete(id);
     setShowDeleteModal(true);
@@ -149,203 +108,215 @@ const Products = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      await APi.delete(`${API}/${idToDelete}`);
+      await APICon.delete(`${API}/${idToDelete}`);
+      toast.success("Product removed from catalog");
       setShowDeleteModal(false);
       setIdToDelete(null);
       loadProducts(currentPage);
     } catch (err) {
-      console.error("Delete error:", err);
+      toast.error("Delete failed");
     }
   };
 
-  // const handleDelete = async (id) => {
-  //   if (window.confirm("Are you sure you want to delete this product?")) {
-  //     const res1 = axios.delete(`${API}/${id}`); // Get current version
-  //     //    const res = await fetch(`${API}/${id}`, { method: "DELETE" });
-  //     console.log("Delete response:", res1);
-  //     if (res1.ok) loadProducts(currentPage);
-  //   }
-  // };
-
-  //   const handleFilterChange = (e) => {
-  //     const { name, value } = e.target;
-  //     setFilters(prev => ({ ...prev, [name]: value }));
-  //   };
-
   return (
-    <div>
-      <div className="topbar bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
-        <h1 className="h5 mb-0">Product Catalog</h1>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
+      <Toaster position="bottom-right" />
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+              <Database className="mr-3 text-blue-600" /> Product Catalog
+            </h2>
+            <p className="text-xs text-gray-500 font-medium ml-9">
+              Manage base products and category item codes
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setEditingProduct(null);
+              setShowForm(true);
+            }}
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+          >
+            <Plus size={18} /> Add Product
+          </button>
+        </div>
 
-        <button
-          className="btn btn-primary d-flex align-items-center"
-          onClick={() => {
-            setEditingProduct(null);
-            setShowForm(true);
-          }}
-        >
-          <Plus size={18} className="me-1" /> Add Product
-        </button>
-      </div>
-
-      <div className="container-fluid py-4">
-        {/* Stats & Filters */}
-        <div className="row g-3 mb-4">
-          <div className="col-md-3">
-            <div className="card p-3 h-100">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <div className="text-muted small">Total Products</div>
-                  <div className="h3 mb-0 text-primary">{totalElements}</div>
-                </div>
-                <div className="bg-primary bg-opacity-10 p-3 rounded">
-                  <PackageOpen className="text-primary" />
-                </div>
-              </div>
+        {/* Compact Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 p-8 flex items-center">
+            <div className="bg-blue-50 text-blue-600 rounded-lg p-2 mr-3">
+              <PackageOpen size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-none mb-1">
+                Total Catalog Items
+              </p>
+              <p className="text-xl font-black text-gray-800 leading-none">
+                {totalElements}
+              </p>
             </div>
           </div>
 
-          <div className="col-md-9">
-            <div className="card p-3">
-              <div className="row g-2">
-                <div className="col-md-6">
-                  <label className="text-muted-small mb-1">
-                    Search Products
-                  </label>
-                  <div className="input-group">
-                    <span className="input-group-text bg-white">
-                      <Search size={16} />
-                    </span>
-                    <input
-                      type="text"
-                      name="search"
-                      className="form-control"
-                      placeholder="Search name or code..."
-                      value={filters.search}
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <label className="text-muted-small mb-1">Start Date</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    className="form-control"
-                    onChange={handleFilterChange}
-                  />
-                </div>
-                <div className="col-md-3">
-                  <label className="text-muted-small mb-1">End Date</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    className="form-control"
-                    onChange={handleFilterChange}
-                  />
-                </div>
+          {/* Advanced Filters Card */}
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-gray-400 p-3 flex items-center md:col-span-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={14}
+                />
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Search name or code..."
+                  className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
+                  value={filters.search}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <div className="relative">
+                <Calendar
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={14}
+                />
+                <input
+                  type="date"
+                  name="startDate"
+                  className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <div className="relative">
+                <Calendar
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={14}
+                />
+                <input
+                  type="date"
+                  name="endDate"
+                  className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleFilterChange}
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body p-0">
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
+        {/* Main Content Table */}
+        <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
+                  <th className="py-4 px-6">No.</th>
+                  <th className="py-4 px-2">Product Name</th>
+                  <th className="py-4 px-2">Item Code</th>
+                  <th className="py-4 px-2">Registration Date</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {loading ? (
                   <tr>
-                    <th className="ps-3">Id</th>
-                    <th>Product Name</th>
-                    <th>Item Code</th>
-                    <th>Created At</th>
-                    <th className="text-end pe-3">Actions</th>
+                    <td colSpan="5" className="py-20 text-center">
+                      <div className="flex flex-col items-center">
+                        <RefreshCw
+                          className="animate-spin text-blue-600 mb-2"
+                          size={24}
+                        />
+                        <span className="text-gray-400 italic font-medium">
+                          Loading catalog...
+                        </span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-5">
-                        Loading...
+                ) : error ? (
+                  <tr>
+                    <td colSpan="5" className="py-20 text-center">
+                      <div className="flex flex-col items-center text-red-500">
+                        <AlertCircle size={40} className="mb-3 opacity-20" />
+                        <p className="font-bold uppercase tracking-tight">
+                          Sync Failed
+                        </p>
+                        <p className="text-xs opacity-70 mb-4">{error}</p>
+                        <button
+                          onClick={() => loadProducts(currentPage)}
+                          className="text-xs bg-red-50 px-4 py-2 rounded-lg border border-red-100 font-bold hover:bg-red-100 transition"
+                        >
+                          Retry Connection
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((p, i) => (
+                    <tr
+                      key={p.productId}
+                      className="border-t hover:bg-blue-50/30 transition-colors group"
+                    >
+                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors text-xs">
+                        {String(currentPage * 10 + (i + 1)).padStart(2, "0")}
                       </td>
-                    </tr>
-                  ) : error ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-5">
-                        <div className="text-danger">
-                          <PackageOpen size={48} className="mb-3 opacity-50" />
-                          <h5 className="fw-bold">Service Unavailable</h5>
-                          <p className={error}>{error}</p>
-                          <button
-                            className="btn btn-sm btn-outline-danger mt-2"
-                            onClick={() => loadProducts(currentPage)}
-                          >
-                            Retry Connection
-                          </button>
-                        </div>
+                      <td className="py-4 px-2 font-bold text-gray-800">
+                        {p.productName}
                       </td>
-                    </tr>
-                  ) : (
-                    products.map((p, i) => (
-                      <tr key={p.productId}>
-                        <td className="ps-3 text-muted">
-                          {currentPage * 10 + (i + 1)}
-                        </td>
-                        <td>
-                          <strong>{p.productName}</strong>
-                        </td>
-                        <td>
-                          <span className="badge border text-dark">
-                            {p.itemCode}
-                          </span>
-                        </td>
-                        <td className="small text-muted">
-                          {p.createdAt || "N/A"}
-                        </td>
-                        <td className="text-end pe-3">
+                      <td className="py-4 px-2">
+                        <span className="bg-gray-100 text-gray-600 font-mono text-[10px] px-2 py-1 rounded-md border border-gray-200">
+                          {p.itemCode}
+                        </span>
+                      </td>
+                      <td className="py-4 px-2 text-gray-500 text-xs">
+                        {p.createdAt || "N/A"}
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2">
                           <button
-                            className="btn btn-sm btn-outline-info me-1"
                             onClick={() => {
                               setEditingProduct(p);
                               setShowForm(true);
                             }}
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all active:scale-90"
                           >
-                            <Edit size={14} />
+                            <Edit size={16} />
                           </button>
                           <button
-                            className="btn btn-sm btn-outline-danger"
                             onClick={() => promptDelete(p.productId)}
+                            className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all active:scale-90"
                           >
-                            <Trash size={14} />
+                            <Trash2 size={16} />
                           </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
 
-          <div className="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
-            <div className="small text-muted">
-              Showing page <strong>{currentPage + 1}</strong> of{" "}
-              <strong>{totalPages}</strong>
+          {/* Pagination Footer */}
+          <div className="p-4 bg-gray-50/50 border-t flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              Showing Page{" "}
+              <span className="text-blue-600">{currentPage + 1}</span> of{" "}
+              {totalPages}
             </div>
-            <div className="btn-group">
+            <div className="flex gap-2">
               <button
-                className="btn btn-sm btn-outline-primary"
                 disabled={currentPage === 0}
                 onClick={() => setCurrentPage((p) => p - 1)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition shadow-sm"
               >
-                <ChevronLeft size={16} /> Previous
+                <ChevronLeft size={14} /> Previous
               </button>
               <button
-                className="btn btn-sm btn-outline-primary"
                 disabled={currentPage >= totalPages - 1}
                 onClick={() => setCurrentPage((p) => p + 1)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition shadow-sm"
               >
-                Next <ChevronRight size={16} />
+                Next <ChevronRight size={14} />
               </button>
             </div>
           </div>
