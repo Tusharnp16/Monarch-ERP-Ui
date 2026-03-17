@@ -42,7 +42,6 @@ const SalesInvoice = () => {
   const fetchInvoiceNumber = async () => {
     try {
       const res = await API.get("/sales-invoices/next-number");
-      // Use res.data.data to get the string, avoiding the object-child error
       setInvoiceNumber(res.data.data || "INV-GENERIC");
     } catch (err) {
       toast.error("Failed to fetch invoice number");
@@ -53,8 +52,8 @@ const SalesInvoice = () => {
   const fetchTopSellers = async () => {
     setLoadingTopSellers(true);
     try {
-      const res = await API.get("/reports/top-sellers-7-days");
-      // If your API returns { success: true, data: [...] }
+      const res = await API.get("/sales-invoices/top-seller");
+      console.log("Top sellers response:", res.data.data);
       setTopSellers(res.data.data || res.data || []);
     } catch (err) {
       console.error("Top sellers error", err);
@@ -77,13 +76,21 @@ const SalesInvoice = () => {
           email: res.data.data.email,
         });
         toast.success("Customer record found");
-      } else {
+      } else if (!res.data.success && !res.data.data) {
         toast("New customer detected", { icon: "✨" });
       }
     } catch (err) {
       toast.error("Error searching for customer");
     }
   };
+
+  useEffect(() => {
+    if (customer.mobile.length === 10) {
+      handleCustomerLookup();
+    } else if (customer.mobile.length < 10 && customer.name !== "") {
+      setCustomer({ mobile: customer.mobile, name: "", email: "" });
+    }
+  }, [customer.mobile]);
 
   const loadInventoryOptions = async (inputValue) => {
     if (!inputValue || inputValue.length < 2) return [];
@@ -138,8 +145,8 @@ const SalesInvoice = () => {
   };
 
   const updateItem = (id, field, value) => {
-    setItems(
-      items.map((item) =>
+    setItems((prevItems) =>
+      prevItems.map((item) =>
         item.id === id ? { ...item, [field]: value } : item,
       ),
     );
@@ -175,6 +182,20 @@ const SalesInvoice = () => {
     }
   };
 
+  const removeItemRow = (id) => {
+    if (items.length <= 1) {
+      toast.error("At least one item is required in the invoice");
+      return;
+    }
+
+    setItems((prevItems) => {
+      const updatedItems = prevItems.filter((item) => item.id !== id);
+      return updatedItems;
+    });
+
+    toast.success("Item removed");
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <Toaster position="bottom-right" />
@@ -207,10 +228,14 @@ const SalesInvoice = () => {
                       type="text"
                       className="w-full border rounded-l-md p-2 outline-none focus:ring-1 focus:ring-blue-500"
                       value={customer.mobile}
-                      onChange={(e) =>
-                        setCustomer({ ...customer, mobile: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        if (val.length <= 10) {
+                          setCustomer({ ...customer, mobile: val });
+                        }
+                      }}
                       maxLength={10}
+                      placeholder="Enter mobile..."
                     />
                     <button
                       onClick={handleCustomerLookup}
@@ -277,9 +302,10 @@ const SalesInvoice = () => {
                     <tr className="text-gray-400 text-xs uppercase tracking-wider">
                       <th className="pb-3 w-1/2">Variant</th>
                       <th className="pb-3 px-2">Qty</th>
+                      <th className="pb-3 px-2 text-right">MRP</th>
                       <th className="pb-3 px-2 text-right">Price</th>
                       <th className="pb-3 text-right">Total</th>
-                      <th className="pb-3"></th>
+                      <th className="pb-3">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -290,22 +316,32 @@ const SalesInvoice = () => {
                             cacheOptions
                             defaultOptions
                             loadOptions={loadInventoryOptions}
-                            placeholder="Search Inventory..."
+                            placeholder="Search Product..."
                             className="text-sm"
                             menuPortalTarget={document.body}
                             styles={{
-                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                              menuPortal: (base) => ({
+                                ...base,
+                                zIndex: 9999,
+                              }),
                             }}
                             onChange={(selected) => {
                               if (selected) {
-                                updateItem(item.id, "price", selected.price);
-                                updateItem(item.id, "mrp", selected.mrp);
-                                updateItem(
-                                  item.id,
-                                  "variantId",
-                                  selected.value,
+                                // We update multiple fields at once
+                                setItems((prev) =>
+                                  prev.map((i) =>
+                                    i.id === item.id
+                                      ? {
+                                          ...i,
+                                          variantId: selected.value,
+                                          price: selected.price,
+                                          mrp: selected.mrp,
+                                          stock: selected.stock,
+                                        }
+                                      : i,
+                                  ),
                                 );
-                                updateItem(item.id, "stock", selected.stock);
+                                toast.success(`${selected.label} selected`);
                               }
                             }}
                           />
@@ -322,14 +358,17 @@ const SalesInvoice = () => {
                             type="number"
                             className="w-16 border rounded p-1 text-center"
                             value={item.quantity}
-                            min="1"
+                            min="0"
                             onChange={(e) => {
-                              const val = parseInt(e.target.value) || 1;
+                              const val = parseInt(e.target.value);
                               if (val > item.stock)
                                 toast.error("Quantity exceeds stock!");
                               updateItem(item.id, "quantity", val);
                             }}
                           />
+                        </td>
+                        <td className="px-2 text-right font-semibold text-gray-600">
+                          ₹{item.price}
                         </td>
                         <td className="px-2 text-right font-semibold text-gray-600">
                           ₹{item.price}
@@ -403,7 +442,7 @@ const SalesInvoice = () => {
                 <tr className="text-gray-400 text-[10px] uppercase tracking-widest">
                   <th className="pb-2">Product</th>
                   <th className="pb-2">Variant</th>
-                  <th className="pb-2 text-center">Sold</th>
+                  <th className="pb-2">Sold</th>
                   <th className="pb-2 text-right">Amount</th>
                 </tr>
               </thead>
@@ -426,8 +465,10 @@ const SalesInvoice = () => {
                       <td className="py-3 font-semibold text-gray-700">
                         {item[0]}
                       </td>
-                      <td className="py-3 text-gray-500">{item[1]}</td>
-                      <td className="py-3 font-bold text-blue-600 text-center">
+                      <td className="py-3 text-gray-500">
+                        {item[1]} ({item[2]} / {item[3]})
+                      </td>
+                      <td className="py-3 font-bold text-blue-600">
                         {item[4]}
                       </td>
                       <td className="py-3 font-bold text-gray-800 font-mono text-right">
