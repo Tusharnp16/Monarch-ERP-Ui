@@ -4,16 +4,18 @@ import {
   Plus,
   Edit,
   Trash2,
-  ChevronRight,
   PackageOpen,
-  AlertCircle,
-  CheckCircle2,
   X,
+  Database,
+  FileSpreadsheet,
+  CheckCircle2,
+  AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import VariantModal from "./VariantModal";
 import DeleteModal from "./DeleteModal";
 import APICon from "../api/AxiosConfig";
-import "../styles/products.css";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { variantReducer, initialState } from "./variantReducer";
@@ -36,7 +38,6 @@ const Variants = () => {
     selectedFile,
     hasNext,
     cursor,
-    error,
   } = state;
 
   // --- Data Loading ---
@@ -48,10 +49,7 @@ const Variants = () => {
         dispatch({ type: "FETCH_SUCCESS", payload: res.data.data });
       }
     } catch (err) {
-      dispatch({
-        type: "FETCH_ERROR",
-        payload: "Failed to connect to server.",
-      });
+      toast.error("Failed to connect to server.");
     }
   };
 
@@ -75,8 +73,10 @@ const Variants = () => {
         payload: res.data.success,
         errors: res.data.errors,
       });
+      if (res.data.success) toast.success("Excel data verified!");
+      else toast.error("Validation failed. Check errors.");
     } catch (err) {
-      dispatch({ type: "FETCH_ERROR", payload: "Verification failed" });
+      toast.error("Verification failed");
     }
   };
 
@@ -86,11 +86,12 @@ const Variants = () => {
     dispatch({ type: "START_LOADING" });
     try {
       await APICon.post("/variants/upload", formData);
+      toast.success("Inventory imported successfully");
       dispatch({ type: "SET_SELECTED_FILE", payload: null });
       dispatch({ type: "SET_VERIFIED", payload: false });
       loadVariants();
     } catch (err) {
-      dispatch({ type: "FETCH_ERROR", payload: "Upload failed." });
+      toast.error("Upload failed.");
     }
   };
 
@@ -113,14 +114,14 @@ const Variants = () => {
     loadVariants();
   }, []);
 
-  // --- Delete ---
   const handleDelete = async () => {
     try {
       await APICon.delete(`/variants/${idToDelete}`);
+      toast.success("Variant removed");
       dispatch({ type: "CLOSE_MODALS" });
       loadVariants();
     } catch (err) {
-      console.error("Delete failed");
+      toast.error("Delete failed");
     }
   };
 
@@ -131,19 +132,21 @@ const Variants = () => {
   );
 
   return (
-    <div>
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="topbar d-flex align-items-center justify-content-between sticky top-0 z-10 bg-white p-4 border-bottom">
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
+      <Toaster position="bottom-right" />
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="h5 mb-0 text-xl font-semibold text-slate-800">
-              Product Variants
-            </h1>
-            <span className="text-muted-small text-slate-500">
-              Manage SKU-level details
-            </span>
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+              <Database className="mr-3 text-blue-600" /> Product Variants
+            </h2>
+            <p className="text-xs text-gray-500 font-medium ml-9">
+              SKU-level pricing, attributes, and image management
+            </p>
           </div>
 
-          <div className="flex gap-2 align-items-center">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <input
               type="file"
               ref={fileInputRef}
@@ -151,18 +154,26 @@ const Variants = () => {
               accept=".xlsx,.xls"
               hidden
             />
+
             {!isVerified ? (
               <button
                 onClick={() => fileInputRef.current.click()}
-                className={`btn ${validationErrors.length > 0 ? "btn-outline-danger" : "btn-outline-secondary"} d-flex align-items-center gap-2`}
                 disabled={loading}
+                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition shadow-sm border ${
+                  validationErrors.length > 0
+                    ? "border-red-600 text-red-600 bg-red-50"
+                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
               >
-                <PackageOpen size={18} />{" "}
-                {loading ? "Verifying..." : "Upload Excel"}
+                <FileSpreadsheet size={18} />
+                {loading ? "Verifying..." : "Import Excel"}
               </button>
             ) : (
-              <div className="flex gap-2">
-                <button onClick={handleUpload} className="btn btn-success">
+              <div className="flex gap-2 items-center bg-green-50 p-1 pr-3 rounded-lg border border-green-200">
+                <button
+                  onClick={handleUpload}
+                  className="bg-green-600 text-white px-4 py-1.5 rounded-md text-sm font-bold hover:bg-green-700 transition"
+                >
                   Confirm & Import
                 </button>
                 <button
@@ -170,111 +181,159 @@ const Variants = () => {
                     dispatch({ type: "SET_VERIFIED", payload: false });
                     dispatch({ type: "SET_SELECTED_FILE", payload: null });
                   }}
-                  className="btn btn-link text-slate-400"
+                  className="text-gray-400 hover:text-red-500 transition"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
             )}
+
             <button
               onClick={() => dispatch({ type: "OPEN_ADD_MODAL" })}
-              className="btn btn-primary d-flex align-items-center gap-2 ms-2"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
             >
-              <Plus size={18} /> Add Variant
+              <Plus size={18} /> New Variant
             </button>
           </div>
-        </header>
+        </div>
 
-        <div className="p-6">
-          <div className="bg-white p-4 rounded-xl shadow-sm border mb-6 flex justify-between items-center">
-            <div className="relative w-2/3">
+        {/* Search and Table Container */}
+        <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
+          <div className="p-4 border-b bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="relative w-full md:w-1/2">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
               />
               <input
                 type="text"
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border rounded-lg outline-none"
-                placeholder="Search..."
+                placeholder="Search by variant name or product..."
+                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
                 value={searchTerm}
                 onChange={(e) =>
                   dispatch({ type: "SET_SEARCH", payload: e.target.value })
                 }
               />
             </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border">
+              Items:{" "}
+              <span className="text-blue-600">{filteredVariants.length}</span>
+            </span>
           </div>
 
-          {/* Table logic remains the same, just ensure you use 'v' from filteredVariants mapping */}
-          <div className="card border-0 shadow-sm overflow-hidden bg-white">
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="bg-slate-50 border-bottom">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
+                  <th className="py-4 px-6">ID</th>
+                  <th className="py-4 px-2">Image</th>
+                  <th className="py-4 px-2">Product & SKU</th>
+                  <th className="py-4 px-2">Variant / Specs</th>
+                  <th className="py-4 px-2 text-right">Pricing</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {loading && variants.length === 0 ? (
                   <tr>
-                    <th>Id</th>
-                    <th>SKU</th>
-                    <th>Product</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Attributes</th>
-                    <th>MRP</th>
-                    <th>Price</th>
-                    <th className="text-end">Actions</th>
+                    <td
+                      colSpan="6"
+                      className="py-20 text-center text-gray-400 italic"
+                    >
+                      Syncing SKUs...
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredVariants.map((v) => (
-                    <tr key={v.variantId}>
-                      <td>{v.variantId}</td>
-                      <td>{v.product?.itemCode}</td>
-                      <td className="font-medium">{v.product?.productName}</td>
-                      <td>
-                        {v.imageUrl ? (
-                          <img
-                            src={v.imageUrl}
-                            className="rounded w-10 h-10 object-cover"
-                            alt=""
-                          />
-                        ) : (
-                          <PackageOpen size={16} className="text-slate-400" />
-                        )}
+                ) : (
+                  filteredVariants.map((v) => (
+                    <tr
+                      key={v.variantId}
+                      className="border-t hover:bg-blue-50/30 transition-colors group"
+                    >
+                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors text-xs">
+                        #{v.variantId}
                       </td>
-                      <td>{v.variantName}</td>
-                      <td>
-                        {v.colour} / {v.size}
+                      <td className="py-4 px-2">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden">
+                          {v.imageUrl ? (
+                            <img
+                              src={v.imageUrl}
+                              className="w-full h-full object-cover"
+                              alt=""
+                            />
+                          ) : (
+                            <ImageIcon size={16} className="text-gray-300" />
+                          )}
+                        </div>
                       </td>
-                      <td>₹{v.mrp?.price || 0}</td>
-                      <td className="font-bold">
-                        ₹{v.sellingPrice?.price || 0}
+                      <td className="py-4 px-2">
+                        <p className="font-bold text-gray-800 leading-tight">
+                          {v.product?.productName}
+                        </p>
+                        <span className="text-[10px] font-mono text-blue-600 font-bold uppercase">
+                          {v.product?.itemCode}
+                        </span>
                       </td>
-                      <td className="text-end">
-                        <button
-                          onClick={() =>
-                            dispatch({ type: "OPEN_EDIT_MODAL", payload: v })
-                          }
-                          className="btn btn-sm btn-outline-info me-2"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() =>
-                            dispatch({
-                              type: "SET_DELETE_TARGET",
-                              payload: v.variantId,
-                            })
-                          }
-                          className="btn btn-sm btn-outline-danger"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <td className="py-4 px-2">
+                        <p className="font-semibold text-gray-700">
+                          {v.variantName}
+                        </p>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-tighter">
+                          {v.colour || "No Color"} / {v.size || "No Size"}
+                        </p>
+                      </td>
+                      <td className="py-4 px-2 text-right">
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-gray-400 line-through">
+                            ₹{v.mrp?.price || 0}
+                          </span>
+                          <span className="font-mono font-bold text-gray-800">
+                            ₹{v.sellingPrice?.price || 0}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={() =>
+                              dispatch({ type: "OPEN_EDIT_MODAL", payload: v })
+                            }
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              dispatch({
+                                type: "SET_DELETE_TARGET",
+                                payload: v.variantId,
+                              })
+                            }
+                            className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      </main>
+
+        {hasNext && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => loadVariants(cursor)}
+              disabled={loading}
+              className="px-10 py-2.5 bg-white border border-gray-300 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
+            >
+              {loading ? "Loading..." : "Load More Variants"}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* --- Modals --- */}
       {(isAddModalOpen || editingVariant) && (
@@ -289,30 +348,55 @@ const Variants = () => {
         onClose={() => dispatch({ type: "CLOSE_MODALS" })}
         onConfirm={handleDelete}
         title="Delete Variant?"
-        message="Are you sure?"
+        message="This will remove this SKU and its history. This action cannot be undone."
       />
 
+      {/* Validation Errors Modal */}
       {showValidationModal && (
-        <div
-          className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          {/* Your existing validation modal JSX here, using validationErrors from destructuring */}
-          <button onClick={() => dispatch({ type: "CLOSE_MODALS" })}>
-            Close
-          </button>
-        </div>
-      )}
-
-      {hasNext && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={() => loadVariants(cursor)}
-            disabled={loading}
-            className="btn btn-outline-primary px-8"
-          >
-            {loading ? "Loading..." : "Load More"}
-          </button>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border-t-8 border-red-500">
+            <div className="p-6 bg-red-50 flex items-center gap-4">
+              <div className="bg-red-100 text-red-600 p-3 rounded-xl">
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <h3 className="font-black text-gray-800 text-lg uppercase">
+                  Import Errors Detected
+                </h3>
+                <p className="text-xs text-red-500 font-medium">
+                  Please correct the following rows in your Excel file
+                </p>
+              </div>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="text-gray-400 uppercase tracking-widest border-b">
+                  <tr>
+                    <th className="pb-2">Row</th>
+                    <th className="pb-2">Error Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {validationErrors.map((err, i) => (
+                    <tr key={i}>
+                      <td className="py-2 font-bold text-gray-500">
+                        #{err.row}
+                      </td>
+                      <td className="py-2 text-red-600">{err.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-4 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => dispatch({ type: "CLOSE_MODALS" })}
+                className="px-6 py-2 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-900 transition"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
