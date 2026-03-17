@@ -129,7 +129,7 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
             <h5 className="modal-title">
               New Purchase Invoice
               <span
-                className={`badge ms-2 ${gstIn === "24" ? "bg-success" : "bg-primary"}`}
+                className={`badge ms-2 text-dark fw-bold ${gstIn === 24 ? "bg-success" : "bg-primary"}`}
               >
                 {gstIn
                   ? gstIn === 24
@@ -165,7 +165,13 @@ const CreatePurchaseModal = ({ onClose, onSuccess }) => {
                   <option value="">Choose Supplier...</option>
                   {suppliers.map((s) => (
                     <option key={s.contactId} value={s.contactId}>
-                      {s.name}
+                      {s.name} (
+                      {s.gstIn
+                        ? s.gstIn === 24
+                          ? "Gujarat"
+                          : "Outside Gujarat"
+                        : "No GSTIN"}
+                      )
                     </option>
                   ))}
                 </select>
