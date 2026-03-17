@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Pencil, Trash2, Phone, Mail } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Phone,
+  Mail,
+  Users,
+  UserPlus,
+  Info,
+} from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import API from "../api/AxiosConfig";
 import CustomerModal from "./CustomerForm";
 import Portal from "../components/Portal";
@@ -10,7 +21,6 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState(null);
 
   // Modal Control State
   const [modalConfig, setModalConfig] = useState({
@@ -21,11 +31,6 @@ const Customers = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  const showNotice = (msg, isError = false) => {
-    setNotice({ msg, isError });
-    setTimeout(() => setNotice(null), 3000);
-  };
-
   const fetchCustomers = async () => {
     setLoading(true);
     try {
@@ -33,7 +38,7 @@ const Customers = () => {
       const data = res.data?.data || res.data || [];
       setCustomers(Array.isArray(data) ? data : []);
     } catch (err) {
-      showNotice("Failed to load customers", true);
+      toast.error("Failed to load customers");
     } finally {
       setLoading(false);
     }
@@ -47,26 +52,26 @@ const Customers = () => {
     try {
       if (modalConfig.mode === "edit") {
         await API.put(`${API_URL}/update`, { ...payload, id: selectedId });
-        showNotice("Customer updated!");
+        toast.success("Customer updated successfully!");
       } else {
         await API.post(`${API_URL}/add`, payload);
-        showNotice("Customer added!");
+        toast.success("New customer added!");
       }
       setModalConfig({ isOpen: false, mode: "add", data: null });
       fetchCustomers();
     } catch (err) {
-      showNotice(err.response?.data?.message || "Operation failed", true);
+      toast.error(err.response?.data?.message || "Operation failed");
     }
   };
 
   const handleDelete = async () => {
     try {
       await API.delete(`${API_URL}/delete/${selectedId}`);
-      showNotice("Customer deleted");
+      toast.success("Customer removed from directory");
       setIsDeleteOpen(false);
       fetchCustomers();
     } catch (err) {
-      showNotice("Delete failed", true);
+      toast.error("Delete failed. Please try again.");
     }
   };
 
@@ -79,117 +84,170 @@ const Customers = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Header & Search UI remains here ... */}
-      <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
-        <h1 className="text-xl font-bold tracking-tight text-slate-800">
-          Customers & Directory
-        </h1>
-        <button
-          onClick={() =>
-            setModalConfig({ isOpen: true, mode: "add", data: null })
-          }
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-md active:scale-95"
-        >
-          <Plus size={18} /> Add Customer
-        </button>
-      </header>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      <Toaster position="bottom-right" />
 
-      <main className="p-6 max-w-7xl mx-auto w-full">
-        {/* Search Bar */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="relative w-full md:w-2/3">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder="Search by name, mobile or email..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <Users className="mr-3 text-blue-600" /> Customers & Directory
+          </h2>
+          <button
+            onClick={() =>
+              setModalConfig({ isOpen: true, mode: "add", data: null })
+            }
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-lg active:scale-95"
+          >
+            <UserPlus size={18} /> Add Customer
+          </button>
+        </div>
+
+        {/* Compact Stats Card */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 p-3 flex items-center">
+            <div className="bg-blue-50 text-blue-600 rounded-lg p-2 mr-3">
+              <Users size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-none mb-1">
+                Total Records
+              </p>
+              <p className="text-xl font-black text-gray-800 leading-none">
+                {customers.length}
+              </p>
+            </div>
           </div>
-          <div className="text-sm font-medium text-slate-500">
-            Total:{" "}
-            <span className="text-slate-800">{filteredCustomers.length}</span>
+
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-gray-300 p-3 flex items-center md:col-span-2 opacity-80">
+            <Info size={16} className="text-gray-400 mr-2" />
+            <p className="text-[11px] text-gray-500 italic leading-tight">
+              Manage your client directory. Search by name, mobile, or email for
+              quick access.
+            </p>
           </div>
         </div>
 
-        {/* Table Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
-              <tr>
-                <th className="px-6 py-4">Index </th>
-                <th className="px-6 py-4">Customer Name</th>
-                <th className="px-6 py-4">Contact</th>
-                <th className="px-6 py-4">GST</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="4" className="p-10 text-center text-slate-400">
-                    Loading...
-                  </td>
+        {/* Search and Table Container */}
+        <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
+          {/* Search Bar Row */}
+          <div className="p-4 border-b bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="relative w-full md:w-1/2">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search directory..."
+                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              Found:{" "}
+              <span className="text-blue-600">{filteredCustomers.length}</span>
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
+                  <th className="py-4 px-6">ID</th>
+                  <th className="py-4 px-2">Customer Info</th>
+                  <th className="py-4 px-2">Contact Details</th>
+                  <th className="py-4 px-2 text-center">GSTIN</th>
+                  <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
-              ) : (
-                filteredCustomers.map((c, i) => (
-                  <tr
-                    key={c.id || c.customerId}
-                    className="hover:bg-slate-50/50 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-mono text-xs text-slate-400">
-                      {String(i + 1).padStart(2, "0")}
-                    </td>
-                    <td className="px-6 py-4 font-semibold">{c.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      <div className="flex flex-col">
-                        <span className="flex items-center gap-1">
-                          <Phone size={12} /> {c.mobile}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Mail size={12} /> {c.email}
+              </thead>
+              <tbody className="text-sm">
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="py-20 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <span className="text-gray-400 italic">
+                          Syncing directory...
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs">
-                      {String(c.gstIn).padStart(2, "0")}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedId(c.id || c.customerId);
-                          setModalConfig({
-                            isOpen: true,
-                            mode: "edit",
-                            data: c,
-                          });
-                        }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                      >
-                        <Pencil size={18} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedId(c.id || c.customerId);
-                          setIsDeleteOpen(true);
-                        }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                  </tr>
+                ) : filteredCustomers.length > 0 ? (
+                  filteredCustomers.map((c, i) => (
+                    <tr
+                      key={c.id || c.customerId}
+                      className="border-t hover:bg-blue-50/30 transition-colors group"
+                    >
+                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors">
+                        {String(i + 1).padStart(2, "0")}
+                      </td>
+                      <td className="py-4 px-2">
+                        <p className="font-bold text-gray-800">{c.name}</p>
+                        <p className="text-[10px] text-gray-400 font-mono">
+                          UID: {c.id || c.customerId}
+                        </p>
+                      </td>
+                      <td className="py-4 px-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center text-xs text-gray-600">
+                            <Phone size={12} className="mr-2 text-blue-500" />{" "}
+                            {c.mobile}
+                          </div>
+                          <div className="flex items-center text-xs text-gray-600">
+                            <Mail size={12} className="mr-2 text-blue-500" />{" "}
+                            {c.email || "N/A"}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-2 text-center">
+                        <span className="bg-gray-100 text-gray-600 font-mono text-[10px] px-2 py-1 rounded border">
+                          {c.gstIn || "UNREGISTERED"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedId(c.id || c.customerId);
+                              setModalConfig({
+                                isOpen: true,
+                                mode: "edit",
+                                data: c,
+                              });
+                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                            title="Edit Profile"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedId(c.id || c.customerId);
+                              setIsDeleteOpen(true);
+                            }}
+                            className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="py-20 text-center text-gray-400">
+                      No matching records found in directory.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </main>
+      </div>
 
       {/* --- MODALS --- */}
       <Portal>
@@ -201,41 +259,37 @@ const Customers = () => {
           onSave={handleSave}
         />
 
-        {/* Simplified Delete Modal logic */}
         {isDeleteOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in duration-200 shadow-2xl">
-              <h3 className="text-xl font-bold text-slate-800">Delete?</h3>
-              <p className="text-slate-500 my-4">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-all">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in-95 duration-200 shadow-2xl border-t-8 border-red-500">
+              <div className="bg-red-50 text-red-600 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="text-xl font-black text-gray-800 uppercase tracking-tight">
+                Remove Customer?
+              </h3>
+              <p className="text-gray-500 text-sm my-4">
+                This will permanently delete the customer from your directory.
                 This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setIsDeleteOpen(false)}
-                  className="flex-1 py-2 border rounded-lg hover:bg-slate-50"
+                  className="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-gray-600 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex-1 py-2 bg-red-600 text-white rounded-lg font-bold"
+                  className="flex-1 py-2 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 active:scale-95 transition-all"
                 >
-                  Delete
+                  Confirm Delete
                 </button>
               </div>
             </div>
           </div>
         )}
       </Portal>
-
-      {/* Toast Notification Container */}
-      {notice && (
-        <div
-          className={`fixed bottom-6 right-6 z-[100] px-6 py-3 rounded-xl shadow-2xl text-white font-medium animate-in slide-in-from-right duration-300 ${notice.isError ? "bg-red-600" : "bg-green-600"}`}
-        >
-          {notice.msg}
-        </div>
-      )}
     </div>
   );
 };
