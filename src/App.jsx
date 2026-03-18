@@ -58,9 +58,7 @@ function App() {
   return (
     <AuthProvider>
       <InventoryAlert />
-      <Suspense fallback={<div className="loader">Loading...</div>}>
-        <RouterProvider router={router} />
-      </Suspense>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 }

@@ -29,6 +29,7 @@ const SalesInvoice = () => {
   const [topSellers, setTopSellers] = useState([]);
   const [loadingTopSellers, setLoadingTopSellers] = useState(true);
   const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchInvoiceNumber();
@@ -152,10 +153,36 @@ const SalesInvoice = () => {
     );
   };
 
+  const resetForm = () => {
+    // 1. Reset Invoice Number (Fetch the next one)
+    fetchInvoiceNumber();
+
+    // 2. Clear Customer
+    setCustomer({ name: "", mobile: "", email: "" });
+
+    // 3. Reset Items to one empty row
+    setItems([
+      {
+        id: Date.now(),
+        variantId: null,
+        quantity: 1,
+        mrp: 0,
+        price: 0,
+        stock: 0,
+      },
+    ]);
+
+    // 4. Reset Notes and Discount
+    setNotes("");
+    setDiscount(0);
+  };
+
   const handleSubmit = async (e) => {
+    setIsSubmitting(true);
     if (e) e.preventDefault();
     if (items.some((i) => !i.variantId)) {
       toast.error("Please select products for all rows");
+      setIsSubmitting(false);
       return;
     }
 
@@ -175,10 +202,13 @@ const SalesInvoice = () => {
       const res = await API.post("/sales-invoices", payload);
       if (res.status === 200 || res.data.success) {
         toast.success("Invoice Saved Successfully!");
-        setTimeout(() => window.location.reload(), 1500);
+        resetForm();
+        fetchTopSellers();
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save invoice");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -206,9 +236,15 @@ const SalesInvoice = () => {
           </h2>
           <button
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center transition shadow-lg"
           >
-            <CheckCircle className="w-4 h-4 mr-2" /> Finalize Sale
+            {isSubmitting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            ) : (
+              <CheckCircle className="w-4 h-4 mr-2" />
+            )}
+            {isSubmitting ? "Processing..." : "Finalize Sale"}
           </button>
         </div>
 
