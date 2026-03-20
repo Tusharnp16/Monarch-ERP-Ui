@@ -61,7 +61,7 @@ const StockMaster = () => {
   };
 
   const filteredStocks = useMemo(() => {
-    return stocks.filter(
+    return (stocks ?? []).filter(
       (s) =>
         s.batchNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.variant?.product?.productName
@@ -71,7 +71,7 @@ const StockMaster = () => {
   }, [stocks, searchTerm]);
 
   const totalQuantity = useMemo(
-    () => stocks.reduce((sum, s) => sum + (s.quantity || 0), 0),
+    () => (stocks ?? []).reduce((sum, s) => sum + (s.quantity || 0), 0),
     [stocks],
   );
 

@@ -63,7 +63,7 @@ const Inventory = () => {
   };
 
   const filteredInventory = useMemo(() => {
-    return inventory.filter((item) => {
+    return (inventory || []).filter((item) => {
       const name = item.variant?.variantName?.toLowerCase() || "";
       const sku = item.variant?.product?.itemCode?.toLowerCase() || "";
       return (

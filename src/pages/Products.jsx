@@ -58,6 +58,9 @@ const Products = () => {
           setTotalElements(result.data.totalElements);
           setTotalPages(result.data.totalPages);
           setCurrentPage(result.data.number);
+          console.log("Products loaded:", {
+            products: result.data.content,
+          });
         }
       } catch (err) {
         const errMsg = err.response
@@ -71,6 +74,42 @@ const Products = () => {
     },
     [filters],
   );
+
+  useEffect(() => {
+    const orders = [
+      { id: 1, status: "completed", total: 120.5, items: 3 },
+      { id: 2, status: "pending", total: 45.0, items: 1 },
+      { id: 3, status: "completed", total: 80.0, items: 2 },
+      { id: 4, status: "cancelled", total: 200.0, items: 5 },
+    ];
+
+    console.log(orders);
+
+    const completedOrders = orders.filter(
+      (order) => order.status === "completed",
+    );
+
+    console.log(completedOrders);
+
+    const displayData = orders.map((order) => {
+      return {
+        orderId: `#${order.id}`,
+        formattedTotal: `$${order.total.toFixed(2)}`,
+        isTaxable: order.total > 100,
+      };
+    });
+
+    console.log(displayData);
+
+    const totalRevenue = orders
+      .filter((order) => order.status === "completed")
+      .reduce((acc, order) => acc + order.total, 0);
+
+    console.log(
+      "Total Revenue from completed orders:",
+      `$${totalRevenue.toFixed(2)}`,
+    );
+  }, []);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {

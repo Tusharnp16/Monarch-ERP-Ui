@@ -24,17 +24,28 @@ const RecentSales = () => {
     fetchRecentInvoices();
   }, []);
 
+  //   const fetchRecentInvoices = async () => {
+  //     try {
+  //       const response = await API.get("/salesitem/recentitems");
+  //       if (response.data.success) setInvoices(response.data.data);
+  //     } catch (err) {
+  //       console.error("Error loading invoices:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
   const fetchRecentInvoices = async () => {
     try {
       const response = await API.get("/salesitem/recentitems");
-      if (response.data.success) setInvoices(response.data.data);
+      if (response.data.success) setInvoices(response.data.data || []);
     } catch (err) {
       console.error("Error loading invoices:", err);
+      setInvoices([]);
     } finally {
       setLoading(false);
     }
   };
-
   const toggleAccordion = async (invoiceId) => {
     if (expandedId === invoiceId) {
       setExpandedId(null);

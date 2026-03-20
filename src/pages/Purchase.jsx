@@ -22,7 +22,7 @@ const Purchases = () => {
       setLoading(true);
       const res = await API.get("/purchase");
       if (res.data.success) {
-        setPurchases(res.data.data);
+        setPurchases(res.data.data || []);
       }
     } catch (err) {
       toast.error("Failed to sync procurement records");
@@ -36,9 +36,16 @@ const Purchases = () => {
     fetchPurchases();
   }, []);
 
-  // Calculate total procurement value for the stats card
+  //   // Calculate total procurement value for the stats card
+  //   const totalProcurementValue = useMemo(() => {
+  //     return purchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+  //   }, [purchases]);
+
   const totalProcurementValue = useMemo(() => {
-    return purchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+    return (purchases || []).reduce(
+      (acc, item) => acc + (item.totalAmount || 0),
+      0,
+    );
   }, [purchases]);
 
   return (

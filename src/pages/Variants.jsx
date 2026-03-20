@@ -19,6 +19,7 @@ import APICon from "../api/AxiosConfig";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { variantReducer, initialState } from "./variantReducer";
+import "../styles/products.css";
 
 const Variants = () => {
   const [state, dispatch] = useReducer(variantReducer, initialState);
