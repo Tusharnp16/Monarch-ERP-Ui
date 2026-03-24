@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import useFetch from "../api/useFetch";
 import {
   History,
@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Activity,
 } from "lucide-react";
+import DataTable from "react-data-table-component";
 
 const LoginHistory = () => {
   const API_ENDPOINT = "/userlogs";
@@ -17,6 +18,87 @@ const LoginHistory = () => {
 
   const logs = data?.data || [];
   const userName = logs.length > 0 ? logs[0].username : "N/A";
+
+  const columns = useMemo(
+    () => [
+      {
+        name: "NO.",
+        selector: (row, index) => String(index + 1).padStart(2, "0"),
+        width: "80px",
+        cell: (row, index) => (
+          <span className="font-mono text-gray-400">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        ),
+      },
+      {
+        name: "LOGIN TIMESTAMP",
+        selector: (row) => row.loginTime,
+        sortable: true,
+        grow: 2,
+        cell: (row) => {
+          const date = new Date(row.loginTime);
+          return (
+            <div className="flex items-center text-gray-700 py-2">
+              <Calendar size={14} className="text-blue-500 mr-2" />
+              <span className="font-medium">{date.toLocaleDateString()}</span>
+              <span className="text-gray-400 ml-2 font-mono text-xs">
+                {date.toLocaleTimeString()}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        name: "STATUS",
+        selector: (row) => "Success",
+        cell: () => (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-600 border border-green-100">
+            <CheckCircle2 size={12} className="mr-1" /> SUCCESS
+          </span>
+        ),
+      },
+      {
+        name: "IP ADDRESS",
+        selector: (row) => row.loginIp,
+        sortable: true,
+        right: true,
+        cell: (row) => (
+          <div className="inline-flex items-center text-gray-600 bg-gray-100 px-3 py-1 rounded-md font-mono text-xs border border-gray-200">
+            <Monitor size={12} className="mr-2 opacity-50" />
+            {row.loginIp || "0.0.0.0"}
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const customStyles = {
+    header: { style: { display: "none" } },
+    headRow: {
+      style: {
+        backgroundColor: "#f9fafb",
+        borderBottomColor: "#e5e7eb",
+      },
+    },
+    headCells: {
+      style: {
+        fontSize: "10px",
+        fontWeight: "700",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        color: "#9ca3af",
+      },
+    },
+    rows: {
+      style: {
+        minHeight: "56px",
+        "&:not(:last-child)": { borderBottomColor: "#e5e7eb" },
+        "&:hover": { backgroundColor: "#f0f7ff", cursor: "pointer" },
+      },
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
@@ -100,76 +182,34 @@ const LoginHistory = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
-                  <th className="py-4 px-6">No.</th>
-                  <th className="py-4 px-2">Login Timestamp</th>
-                  <th className="py-4 px-2">Status</th>
-                  <th className="py-4 px-6 text-right">IP Address</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-20">
-                      <RefreshCcw
-                        className="animate-spin text-blue-600 mx-auto mb-2"
-                        size={32}
-                      />
-                      <span className="text-gray-400 italic">
-                        Synchronizing logs...
-                      </span>
-                    </td>
-                  </tr>
-                ) : logs.length > 0 ? (
-                  logs.map((log, index) => (
-                    <LogTableRow key={index} log={log} index={index} />
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-20 text-gray-400">
-                      No activity history found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <DataTable
+              columns={columns}
+              data={logs}
+              progressPending={isLoading}
+              pagination
+              highlightOnHover
+              customStyles={customStyles}
+              progressComponent={
+                <div className="py-20 text-center">
+                  <RefreshCcw
+                    className="animate-spin text-blue-600 mx-auto mb-2"
+                    size={32}
+                  />
+                  <span className="text-gray-400 italic">
+                    Synchronizing logs...
+                  </span>
+                </div>
+              }
+              noDataComponent={
+                <div className="py-20 text-gray-400">
+                  No activity history found.
+                </div>
+              }
+            />
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-const LogTableRow = ({ log, index }) => {
-  const date = new Date(log.loginTime);
-  return (
-    <tr className="border-t hover:bg-blue-50/30 transition-colors group">
-      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors">
-        {String(index + 1).padStart(2, "0")}
-      </td>
-      <td className="py-4 px-2">
-        <div className="flex items-center text-gray-700">
-          <Calendar size={14} className="text-blue-500 mr-2" />
-          <span className="font-medium">{date.toLocaleDateString()}</span>
-          <span className="text-gray-400 ml-2 font-mono">
-            {date.toLocaleTimeString()}
-          </span>
-        </div>
-      </td>
-      <td className="py-4 px-2">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-600 border border-green-100">
-          <CheckCircle2 size={12} className="mr-1" /> Success
-        </span>
-      </td>
-      <td className="py-4 px-6 text-right">
-        <div className="inline-flex items-center text-gray-600 bg-gray-100 px-3 py-1 rounded-md font-mono text-xs border border-gray-200">
-          <Monitor size={12} className="mr-2 opacity-50" />
-          {log.loginIp || "0.0.0.0"}
-        </div>
-      </td>
-    </tr>
   );
 };
 
