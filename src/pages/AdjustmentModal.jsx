@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import API from "../api/AxiosConfig";
+import { Package, Info } from "lucide-react";
 
-const AdjustmentModal = ({ onClose, inventoryList, refreshData }) => {
+const AdjustmentModal = ({ onClose, selectedProduct, refreshData }) => {
+  console.log(selectedProduct);
   const [formData, setFormData] = useState({
-    inventoryId: "",
+    inventoryId: selectedProduct.inventoryId,
     adjustmentType: "ADD",
     quantity: 1,
-    reason: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,14 +20,12 @@ const AdjustmentModal = ({ onClose, inventoryList, refreshData }) => {
       params.append("inventoryId", formData.inventoryId);
       params.append("adjustmentType", formData.adjustmentType);
       params.append("quantity", formData.quantity);
-      params.append("reason", formData.reason);
 
-      // REFACTORED: Using your API utility with a plain object
       const response = await API.post("/inventory/update", params);
 
       if (response.data.success) {
-        refreshData(); // Refresh the table in Inventory.jsx
-        onClose(); // Close the modal
+        refreshData();
+        onClose();
       }
     } catch (error) {
       console.error("Stock adjustment failed:", error);
@@ -58,7 +57,7 @@ const AdjustmentModal = ({ onClose, inventoryList, refreshData }) => {
         <form className="modal-content border-0" onSubmit={handleSubmit}>
           <div className="modal-header bg-light">
             <h5 className="modal-title fw-bold text-dark text-uppercase small tracking-wider">
-              Manual Stock Adjustment
+              Stock Adjustment
             </h5>
             <button
               type="button"
@@ -70,25 +69,24 @@ const AdjustmentModal = ({ onClose, inventoryList, refreshData }) => {
 
           <div className="modal-body p-4">
             <div className="mb-3">
-              <label className="form-label text-muted small fw-bold">
-                SELECT PRODUCT VARIANT
+              <label className="d-block text-muted small fw-bold mb-2 tracking-tighter">
+                SELECTED VARIANT
               </label>
-              <select
-                className="form-select"
-                required
-                value={formData.inventoryId}
-                onChange={(e) =>
-                  setFormData({ ...formData, inventoryId: e.target.value })
-                }
-              >
-                <option value="">Choose a product...</option>
-                {inventoryList.map((item) => (
-                  <option key={item.inventoryId} value={item.inventoryId}>
-                    {item.variant?.product?.productName} —{" "}
-                    {item.variant?.variantName}
-                  </option>
-                ))}
-              </select>
+              <div className="d-flex align-items-center">
+                <div className="bg-white p-2 rounded-2 border me-3">
+                  <Package size={24} className="text-primary" />
+                </div>
+                <div>
+                  <h6 className="mb-0 fw-bold text-dark">
+                    {selectedProduct.variant.variantName}
+                  </h6>
+                  <p className="mb-0 small text-muted">
+                    <code className="text-primary font-monospace">
+                      {selectedProduct.variant.product.itemCode}
+                    </code>
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="row g-3 mb-3">
@@ -123,21 +121,6 @@ const AdjustmentModal = ({ onClose, inventoryList, refreshData }) => {
                   }
                 />
               </div>
-            </div>
-
-            <div className="mb-0">
-              <label className="form-label text-muted small fw-bold">
-                REASON / NOTES
-              </label>
-              <textarea
-                className="form-control"
-                rows="2"
-                placeholder="e.g., Damaged goods, seasonal restock..."
-                value={formData.reason}
-                onChange={(e) =>
-                  setFormData({ ...formData, reason: e.target.value })
-                }
-              ></textarea>
             </div>
           </div>
 

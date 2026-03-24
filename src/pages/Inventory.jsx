@@ -23,11 +23,16 @@ const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState({ total: 0, low: 0, out: 0 });
   const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handleOpenAdjustment = (item = null) => {
+    setSelectedItem(item);
+  };
 
   useEffect(() => {
     fetchInventory(true);
 
-    const POLLING_INTERVAL = 15000; // Increased slightly for better performance
+    const POLLING_INTERVAL = 15000;
     const intervalId = setInterval(() => {
       fetchInventory(false);
     }, POLLING_INTERVAL);
@@ -86,20 +91,6 @@ const Inventory = () => {
             <p className="text-xs text-gray-500 font-medium ml-9 italic">
               Real-time stock monitoring & adjustments
             </p>
-          </div>
-          <div className="flex gap-3 w-full md:w-auto">
-            <button
-              onClick={() => window.print()}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition shadow-sm"
-            >
-              <Printer size={18} /> Export
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
-            >
-              <RefreshCw size={18} /> Adjust Stock
-            </button>
           </div>
         </div>
 
@@ -178,6 +169,7 @@ const Inventory = () => {
                       item={item}
                       index={idx + 1}
                       navigate={navigate}
+                      onAdjust={handleOpenAdjustment}
                     />
                   ))
                 ) : (
@@ -195,10 +187,10 @@ const Inventory = () => {
           </div>
         </div>
 
-        {isModalOpen && (
+        {selectedItem && (
           <AdjustmentModal
-            onClose={() => setIsModalOpen(false)}
-            inventoryList={inventory}
+            onClose={() => setSelectedItem(null)}
+            selectedProduct={selectedItem}
             refreshData={fetchInventory}
           />
         )}
@@ -224,12 +216,12 @@ const StatCard = memo(({ title, value, color, icon }) => (
   </div>
 ));
 
-const InventoryRow = memo(({ item, index, navigate }) => {
+const InventoryRow = memo(({ item, index, navigate, onAdjust }) => {
   const avail = item.availableQuantity;
   const variantName = item.variant?.variantName || "Removed";
   const sku = item.variant?.product?.itemCode || "N/A";
 
-  const getStatus = () => {
+  const status = useMemo(() => {
     if (avail <= 0)
       return {
         label: "OUT",
@@ -247,9 +239,7 @@ const InventoryRow = memo(({ item, index, navigate }) => {
       color: "bg-green-50 text-green-600 border-green-100",
       dot: "bg-green-500",
     };
-  };
-
-  const status = getStatus();
+  }, [avail]);
 
   return (
     <tr className="border-t hover:bg-blue-50/30 transition-colors group">
@@ -264,9 +254,7 @@ const InventoryRow = memo(({ item, index, navigate }) => {
           {sku}
         </span>
       </td>
-      <td className="py-4 px-2 font-mono text-gray-600 font-bold">
-        {item.availableQuantity}
-      </td>
+      <td className="py-4 px-2 font-mono text-gray-600 font-bold">{avail}</td>
       <td className="py-4 px-2 font-mono text-gray-400">{item.quantity}</td>
       <td className="py-4 px-2">
         <div
@@ -284,17 +272,9 @@ const InventoryRow = memo(({ item, index, navigate }) => {
       <td className="py-4 px-6 text-right">
         <div className="flex justify-end gap-1">
           <button
-            className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-400 hover:text-blue-600 transition-all active:scale-90 border border-transparent hover:border-gray-200"
-            title="View History"
-            onClick={() =>
-              navigate(`/inventory/history?id=${item.inventoryId}`)
-            }
-          >
-            <History size={16} />
-          </button>
-          <button
             className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-400 hover:text-green-600 transition-all active:scale-90 border border-transparent hover:border-gray-200"
-            title="Movement Log"
+            title="Quick Adjust Stock"
+            onClick={() => onAdjust(item)} // Now correctly calls the handler
           >
             <ArrowLeftRight size={16} />
           </button>
