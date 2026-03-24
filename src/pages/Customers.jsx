@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Plus,
   Search,
@@ -14,6 +14,7 @@ import toast, { Toaster } from "react-hot-toast";
 import API from "../api/AxiosConfig";
 import CustomerModal from "./CustomerForm";
 import Portal from "../components/Portal";
+import DataTable from "react-data-table-component";
 
 const API_URL = "/customers";
 
@@ -83,6 +84,112 @@ const Customers = () => {
     ),
   );
 
+  const columns = useMemo(
+    () => [
+      {
+        name: "ID",
+        selector: (row, i) => String(i + 1).padStart(2, "0"),
+        width: "80px",
+        cell: (row, i) => (
+          <span className="font-mono text-gray-400">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+        ),
+      },
+      {
+        name: "CUSTOMER INFO",
+        selector: (row) => row.name,
+        sortable: true,
+        cell: (row) => (
+          <div className="py-2">
+            <p className="font-bold text-gray-800 leading-tight">{row.name}</p>
+            <p className="text-[10px] text-gray-400 font-mono">
+              UID: {row.id || row.customerId}
+            </p>
+          </div>
+        ),
+      },
+      {
+        name: "CONTACT DETAILS",
+        selector: (row) => row.email,
+        cell: (row) => (
+          <div className="space-y-1 py-2">
+            <div className="flex items-center text-xs text-gray-600">
+              <Phone size={12} className="mr-2 text-blue-500" /> {row.mobile}
+            </div>
+            <div className="flex items-center text-xs text-gray-600">
+              <Mail size={12} className="mr-2 text-blue-500" />{" "}
+              {row.email || "N/A"}
+            </div>
+          </div>
+        ),
+      },
+      {
+        name: "GSTIN",
+        selector: (row) => row.gstIn,
+        center: true,
+        cell: (row) => (
+          <span className="bg-gray-100 text-gray-600 font-mono text-[10px] px-2 py-1 rounded border">
+            {row.gstIn || "UNREGISTERED"}
+          </span>
+        ),
+      },
+      {
+        name: "ACTIONS",
+        right: true,
+        cell: (row) => (
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                setSelectedId(row.id || row.customerId);
+                setModalConfig({ isOpen: true, mode: "edit", data: row });
+              }}
+              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={() => {
+                setSelectedId(row.id || row.customerId);
+                setIsDeleteOpen(true);
+              }}
+              className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const customStyles = {
+    header: { style: { display: "none" } },
+    headRow: {
+      style: {
+        backgroundColor: "#f9fafb",
+        borderBottomColor: "#e5e7eb",
+      },
+    },
+    headCells: {
+      style: {
+        fontSize: "10px",
+        fontWeight: "700",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        color: "#9ca3af",
+      },
+    },
+    rows: {
+      style: {
+        minHeight: "56px",
+        "&:not(:last-child)": { borderBottomColor: "#e5e7eb" },
+        "&:hover": { backgroundColor: "#f0f7ff", cursor: "pointer" },
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <Toaster position="bottom-right" />
@@ -130,122 +237,51 @@ const Customers = () => {
 
         {/* Search and Table Container */}
         <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
-          {/* Search Bar Row */}
-          <div className="p-4 border-b bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="relative w-full md:w-1/2">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-              <input
-                type="text"
-                placeholder="Search directory..."
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Found:{" "}
-              <span className="text-blue-600">{filteredCustomers.length}</span>
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
-                  <th className="py-4 px-6">ID</th>
-                  <th className="py-4 px-2">Customer Info</th>
-                  <th className="py-4 px-2">Contact Details</th>
-                  <th className="py-4 px-2 text-center">GSTIN</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="py-20 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                        <span className="text-gray-400 italic">
-                          Syncing directory...
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredCustomers.length > 0 ? (
-                  filteredCustomers.map((c, i) => (
-                    <tr
-                      key={c.id || c.customerId}
-                      className="border-t hover:bg-blue-50/30 transition-colors group"
-                    >
-                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors">
-                        {String(i + 1).padStart(2, "0")}
-                      </td>
-                      <td className="py-4 px-2">
-                        <p className="font-bold text-gray-800">{c.name}</p>
-                        <p className="text-[10px] text-gray-400 font-mono">
-                          UID: {c.id || c.customerId}
-                        </p>
-                      </td>
-                      <td className="py-4 px-2">
-                        <div className="space-y-1">
-                          <div className="flex items-center text-xs text-gray-600">
-                            <Phone size={12} className="mr-2 text-blue-500" />{" "}
-                            {c.mobile}
-                          </div>
-                          <div className="flex items-center text-xs text-gray-600">
-                            <Mail size={12} className="mr-2 text-blue-500" />{" "}
-                            {c.email || "N/A"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-2 text-center">
-                        <span className="bg-gray-100 text-gray-600 font-mono text-[10px] px-2 py-1 rounded border">
-                          {c.gstIn || "UNREGISTERED"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedId(c.id || c.customerId);
-                              setModalConfig({
-                                isOpen: true,
-                                mode: "edit",
-                                data: c,
-                              });
-                            }}
-                            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                            title="Edit Profile"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedId(c.id || c.customerId);
-                              setIsDeleteOpen(true);
-                            }}
-                            className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="py-20 text-center text-gray-400">
-                      No matching records found in directory.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={columns}
+            data={filteredCustomers}
+            pagination
+            highlightOnHover
+            progressPending={loading}
+            customStyles={customStyles}
+            subHeader
+            subHeaderComponent={
+              <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4 pb-2">
+                <div className="relative w-full md:w-1/2">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search directory..."
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Found:{" "}
+                  <span className="text-blue-600">
+                    {filteredCustomers.length}
+                  </span>
+                </span>
+              </div>
+            }
+            progressComponent={
+              <div className="py-20 text-center">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <span className="text-gray-400 italic">
+                  Syncing directory...
+                </span>
+              </div>
+            }
+            noDataComponent={
+              <div className="py-20 text-gray-400">
+                No matching records found in directory.
+              </div>
+            }
+          />
         </div>
       </div>
 

@@ -1,0 +1,26 @@
+
+  const customStyles = {
+    header: { style: { display: "none" } },
+    headRow: {
+      style: {
+        backgroundColor: "#f9fafb",
+        borderBottomColor: "#e5e7eb",
+      },
+    },
+    headCells: {
+      style: {
+        fontSize: "10px",
+        fontWeight: "700",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        color: "#9ca3af",
+      },
+    },
+    rows: {
+      style: {
+        minHeight: "56px",
+        "&:not(:last-child)": { borderBottomColor: "#e5e7eb" },
+        "&:hover": { backgroundColor: "#f0f7ff", cursor: "pointer" },
+      },
+    },
+  };
