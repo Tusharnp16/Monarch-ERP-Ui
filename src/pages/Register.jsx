@@ -8,7 +8,6 @@ const Register = () => {
     userName: "",
     email: "",
     password: "",
-    role: "USER",
   });
 
   const [error, setError] = useState("");
@@ -36,7 +35,6 @@ const Register = () => {
 
   return (
     <div className="login-layout">
-      {/* LEFT SIDE - SAME AS LOGIN */}
       <div className="login-left">
         <div className="overlay" />
         <div className="brand-content">
@@ -95,24 +93,6 @@ const Register = () => {
                 required
               />
               <label>Password</label>
-            </div>
-
-            <div className="form-group">
-              <select
-                id="role"
-                value={formData.role}
-                onChange={handleChange}
-                style={{
-                  width: "100%",
-                  padding: "14px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border)",
-                  fontSize: "14px",
-                }}
-              >
-                <option value="USER">Standard User</option>
-                <option value="ADMIN">System Administrator</option>
-              </select>
             </div>
 
             <button type="submit" disabled={isLoading}>
