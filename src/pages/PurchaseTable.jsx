@@ -40,8 +40,7 @@ const PurchaseTable = ({ purchases, loading }) => {
             <th>Supplier</th>
             <th>Date</th>
             <th>Items</th>
-            <th>Total Amount</th>
-            <th className="text-end pe-3">Actions</th>
+            <th className="text-end">Total Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -77,13 +76,8 @@ const PurchaseTable = ({ purchases, loading }) => {
                     {p.itemCount} Items
                   </span>
                 </td>
-                <td className="fw-bold text-primary">
+                <td className="fw-bold text-end pe-3">
                   ₹ {p.totalAmount?.toLocaleString("en-IN")}
-                </td>
-                <td className="text-end pe-3">
-                  <button className="btn btn-sm btn-light border">
-                    <Printer size={14} />
-                  </button>
                 </td>
               </tr>
 

@@ -1,5 +1,5 @@
 
-  const customStyles = {
+ export const customStyles = {
     header: { style: { display: "none" } },
     headRow: {
       style: {

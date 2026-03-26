@@ -11,6 +11,7 @@ import {
   Activity,
 } from "lucide-react";
 import DataTable from "react-data-table-component";
+import { customStyles } from "../components/dataTableStyle";
 
 const LoginHistory = () => {
   const API_ENDPOINT = "/userlogs";
@@ -73,32 +74,6 @@ const LoginHistory = () => {
     ],
     [],
   );
-
-  const customStyles = {
-    header: { style: { display: "none" } },
-    headRow: {
-      style: {
-        backgroundColor: "#f9fafb",
-        borderBottomColor: "#e5e7eb",
-      },
-    },
-    headCells: {
-      style: {
-        fontSize: "10px",
-        fontWeight: "700",
-        textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        color: "#9ca3af",
-      },
-    },
-    rows: {
-      style: {
-        minHeight: "56px",
-        "&:not(:last-child)": { borderBottomColor: "#e5e7eb" },
-        "&:hover": { backgroundColor: "#f0f7ff", cursor: "pointer" },
-      },
-    },
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">

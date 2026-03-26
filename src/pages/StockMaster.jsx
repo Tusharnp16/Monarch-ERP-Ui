@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import API from "../api/AxiosConfig";
+import DataTable from "react-data-table-component";
+import { customStyles } from "../components/dataTableStyle";
 
 const StockMaster = () => {
   const [stocks, setStocks] = useState([]);
@@ -103,6 +105,120 @@ const StockMaster = () => {
     }
   };
 
+  const columns = useMemo(
+    () => [
+      {
+        name: "NO.",
+        selector: (row, idx) => idx + 1,
+        width: "70px",
+        cell: (row, idx) => (
+          <span className="font-mono text-gray-400">
+            {String(idx + 1).padStart(2, "0")}
+          </span>
+        ),
+      },
+      {
+        name: "PRODUCT & VARIANT",
+        selector: (row) => row.variant?.product?.productName,
+        sortable: true,
+        grow: 2,
+        cell: (row) =>
+          row.variant ? (
+            <div className="py-2">
+              <p className="font-bold text-gray-800 leading-tight">
+                {row.variant.product.productName}
+              </p>
+              <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter">
+                {row.variant.variantName}
+              </p>
+            </div>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-red-500 text-[10px] font-bold uppercase">
+              <AlertTriangle size={12} /> Deleted Product
+            </span>
+          ),
+      },
+      {
+        name: "BATCH NO",
+        selector: (row) => row.batchNo,
+        sortable: true,
+        width: "180px",
+        style: {
+          paddingLeft: "0px",
+          marginLeft: "-10px",
+        },
+        cell: (row) => (
+          <span className="bg-gray-100 px-2 py-1 rounded border border-gray-200 font-mono text-xs text-gray-600">
+            {row.batchNo || "N/A"}
+          </span>
+        ),
+      },
+      {
+        name: "QUANTITY",
+        selector: (row) => row.quantity,
+        sortable: true,
+        cell: (row) => (
+          <span
+            className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+              row.quantity < 10
+                ? "bg-red-50 text-red-600 border-red-100"
+                : "bg-green-50 text-green-600 border-green-100"
+            }`}
+          >
+            {row.quantity} UNITS
+          </span>
+        ),
+      },
+      {
+        name: "MRP",
+        selector: (row) => row.mrp?.price,
+        sortable: true,
+        cell: (row) => (
+          <span className="text-gray-400 font-mono">
+            ₹{row.mrp?.price || 0}
+          </span>
+        ),
+      },
+      {
+        name: "SELL",
+        selector: (row) => row.sellingPrice?.price,
+        sortable: true,
+        cell: (row) => (
+          <span className="text-blue-600 font-bold font-mono">
+            ₹{row.sellingPrice?.price || 0}
+          </span>
+        ),
+      },
+      {
+        name: "EXPIRY",
+        selector: (row) => row.expiryDate,
+        sortable: true,
+        cell: (row) => (
+          <div className="flex items-center text-gray-500 text-xs">
+            <Calendar size={12} className="mr-1 opacity-50" />
+            {row.expiryDate || "No Expiry"}
+          </div>
+        ),
+      },
+      {
+        name: "ACTIONS",
+        right: true,
+        cell: (row) => (
+          <button
+            onClick={() => {
+              setEditingStock(row);
+              setIsModalOpen(true);
+            }}
+            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all active:scale-90"
+          >
+            <Edit3 size={16} />
+          </button>
+        ),
+      },
+    ],
+    [],
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
       <Toaster position="bottom-right" />
@@ -147,128 +263,52 @@ const StockMaster = () => {
 
         {/* Main Content Card */}
         <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-600 overflow-hidden">
-          {/* Search Row */}
-          <div className="p-4 border-b bg-gray-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="relative w-full md:w-1/2">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-              <input
-                type="text"
-                placeholder="Search by Batch No or Product Name..."
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              Unique Batches:{" "}
-              <span className="text-blue-600">{filteredStocks.length}</span>
-            </span>
-          </div>
-
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-gray-400 text-[10px] uppercase tracking-widest border-b">
-                  <th className="py-4 px-6">No.</th>
-                  <th className="py-4 px-2">Product & Variant</th>
-                  <th className="py-4 px-2">Batch No</th>
-                  <th className="py-4 px-2">Quantity</th>
-                  <th className="py-4 px-2">MRP</th>
-                  <th className="py-4 px-2">Sell</th>
-                  <th className="py-4 px-2">Expiry</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="py-20 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                        <span className="text-gray-400 italic">
-                          Syncing inventory...
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredStocks.map((s, idx) => (
-                    <tr
-                      key={s.stockMasterId}
-                      className="border-t hover:bg-blue-50/30 transition-colors group"
-                    >
-                      <td className="py-4 px-6 font-mono text-gray-400 group-hover:text-blue-600 transition-colors">
-                        {String(idx + 1).padStart(2, "0")}
-                      </td>
-                      <td className="py-4 px-2">
-                        {s.variant ? (
-                          <div>
-                            <p className="font-bold text-gray-800">
-                              {s.variant.product.productName}
-                            </p>
-                            <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter">
-                              {s.variant.variantName}
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-red-500 text-[10px] font-bold uppercase">
-                            <AlertTriangle size={12} /> Deleted Product
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-2 font-mono text-xs text-gray-600">
-                        <span className="bg-gray-100 px-2 py-1 rounded border border-gray-200">
-                          {s.batchNo || "N/A"}
-                        </span>
-                      </td>
-                      <td className="py-4 px-2">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                            s.quantity < 10
-                              ? "bg-red-50 text-red-600 border-red-100"
-                              : "bg-green-50 text-green-600 border-green-100"
-                          }`}
-                        >
-                          {s.quantity} UNITS
-                        </span>
-                      </td>
-                      <td className="py-4 px-2 font-mono text-xs">
-                        <div className="flex flex-col">
-                          <span className="text-gray-400 ">
-                            ₹{s.mrp?.price || 0}
-                          </span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="text-blue-600 font-bold">
-                          ₹{s.sellingPrice?.price || 0}
-                        </span>
-                      </td>
-                      <td className="py-4 px-2">
-                        <div className="flex items-center text-gray-500 text-xs">
-                          <Calendar size={12} className="mr-1 opacity-50" />
-                          {s.expiryDate || "No Expiry"}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => {
-                            setEditingStock(s);
-                            setIsModalOpen(true);
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all active:scale-90"
-                        >
-                          <Edit3 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            <DataTable
+              columns={columns}
+              data={filteredStocks}
+              pagination
+              highlightOnHover
+              progressPending={loading}
+              customStyles={customStyles}
+              subHeader
+              subHeaderComponent={
+                <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4 pb-2">
+                  <div className="relative w-full md:w-1/2">
+                    <Search
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search by Batch No or Product Name..."
+                      className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    Unique Batches:{" "}
+                    <span className="text-blue-600">
+                      {filteredStocks.length}
+                    </span>
+                  </span>
+                </div>
+              }
+              progressComponent={
+                <div className="py-20 text-center">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <span className="text-gray-400 italic">
+                    Syncing inventory...
+                  </span>
+                </div>
+              }
+              noDataComponent={
+                <div className="py-20 text-gray-400">
+                  No matching stock found.
+                </div>
+              }
+            />
           </div>
         </div>
       </div>

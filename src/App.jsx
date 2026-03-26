@@ -22,6 +22,7 @@ const Customers = lazy(() => import("./pages/Customers"));
 const LoginHistory = lazy(() => import("./pages/LoginHistory"));
 const RecentSales = lazy(() => import("./pages/RecentSales"));
 const SalesInvoice = lazy(() => import("./pages/SalesInvoice"));
+const StockLedger = lazy(() => import("./pages/StockLedger"));
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
       { path: "variants", element: <Variants /> },
       { path: "inventory", element: <Inventory /> },
       { path: "stockmaster", element: <StockMaster /> },
+      { path: "ledger", element: <StockLedger /> },
       { path: "purchase", element: <PurchasesPage /> },
       { path: "contacts", element: <Contacts /> },
       { path: "purchase/report", element: <Products /> },
